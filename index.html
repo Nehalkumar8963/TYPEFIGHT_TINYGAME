@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TYPEFIGHT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="game-wrapper">
+    <div id="crt-overlay"></div>
+    <div id="game-container"></div>
+
+    <!-- MAIN MENU OVERLAY -->
+    <div id="main-menu" class="overlay active">
+      <div class="menu-scanlines"></div>
+      <div class="menu-content">
+        <div class="title-block">
+          <h1 class="title-glow">TYPE<span class="title-accent">FIGHT</span></h1>
+          <p class="subtitle">PRESS KEYS &bull; DEAL DAMAGE &bull; WIN</p>
+        </div>
+
+        <div class="controls-hint">
+          <div class="hint-row"><span class="hint-key" style="color:#39ff14">A-W-S-Q</span><span class="hint-label">JAB</span></div>
+          <div class="hint-row"><span class="hint-key" style="color:#4d7cff">D-F-E-R</span><span class="hint-label">CROSS</span></div>
+          <div class="hint-row"><span class="hint-key" style="color:#ff6600">T-Y-G-H</span><span class="hint-label">KICK</span></div>
+          <div class="hint-row"><span class="hint-key" style="color:#ff00ff">U-I-J-K</span><span class="hint-label">UPPERCUT</span></div>
+          <div class="hint-row"><span class="hint-key" style="color:#00ffff">O-P-L-;</span><span class="hint-label">SPECIAL</span></div>
+          <div class="hint-row"><span class="hint-key" style="color:#ff2d00">B-N-M</span><span class="hint-label">HAYMAKER</span></div>
+          <div class="hint-row"><span class="hint-key" style="color:#ffffff">C-V-X-Z</span><span class="hint-label">FINISHER</span></div>
+          <div class="hint-note">KEYS SHUFFLE EVERY ROUND &bull; A-Z</div>
+        </div>
+
+        <div class="menu-section">
+          <p class="menu-label">SELECT DIFFICULTY</p>
+          <div class="btn-row" id="difficulty-btns">
+            <button class="pixel-btn btn-green" data-value="easy">EASY</button>
+            <button class="pixel-btn btn-blue active" data-value="normal">NORMAL</button>
+            <button class="pixel-btn btn-yellow" data-value="hard">HARD</button>
+            <button class="pixel-btn btn-red" data-value="insane">INSANE</button>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <p class="menu-label">SELECT OPPONENT</p>
+          <div class="btn-row" id="enemy-btns">
+            <button class="pixel-btn btn-green" data-value="rookie">ROOKIE</button>
+            <button class="pixel-btn btn-blue active" data-value="fighter">FIGHTER</button>
+            <button class="pixel-btn btn-yellow" data-value="ninja">NINJA</button>
+            <button class="pixel-btn btn-red" data-value="boss">BOSS</button>
+          </div>
+        </div>
+
+        <button class="pixel-btn btn-start" id="start-btn">&#9654; START FIGHT</button>
+        <button class="pixel-btn btn-practice" id="practice-btn">&#9679; PRACTICE</button>
+
+        <p class="blink-text">INSERT COIN TO CONTINUE</p>
+      </div>
+    </div>
+
+    <!-- HUD OVERLAY -->
+    <div id="hud" class="overlay">
+      <div class="hud-top">
+        <div class="hp-block">
+          <span class="hp-name">PLAYER</span>
+          <div class="pixel-hp-bar">
+            <div class="pixel-hp-fill player-hp-fill" id="player-hp-fill"></div>
+            <span class="hp-text" id="player-hp-text">100</span>
+          </div>
+        </div>
+        <div class="hud-center-stats">
+          <div class="stat-chip" id="combo-display">COMBO x0</div>
+          <div class="stat-chip" id="mode-indicator"></div>
+          <div class="stat-row">
+            <div class="stat-chip small" id="wpm-display">0 WPM</div>
+            <div class="stat-chip small" id="accuracy-display">100%</div>
+            <div class="stat-chip small" id="distance-display">FAR</div>
+          </div>
+        </div>
+        <div class="hp-block enemy-hp-block" id="enemy-hp-block">
+          <span class="hp-name" id="enemy-name-label">ENEMY</span>
+          <div class="pixel-hp-bar enemy-bar">
+            <div class="pixel-hp-fill enemy-hp-fill" id="enemy-hp-fill"></div>
+            <span class="hp-text" id="enemy-hp-text">100</span>
+          </div>
+          <div class="enemy-hp-list" id="enemy-hp-list"></div>
+        </div>
+      </div>
+
+      <div class="hud-bottom">
+        <div class="energy-block">
+          <span class="energy-label">SPECIAL</span>
+          <div class="pixel-energy-bar">
+            <div class="pixel-energy-fill" id="energy-fill"></div>
+          </div>
+          <span class="energy-hint" id="energy-hint">[SPACE]</span>
+        </div>
+        <div class="letter-queue-area" id="letter-queue">
+        </div>
+      </div>
+
+      <div id="damage-numbers"></div>
+      <div id="combo-popups"></div>
+    </div>
+
+    <!-- RESULT SCREEN OVERLAY -->
+    <div id="result-screen" class="overlay">
+      <div class="menu-scanlines"></div>
+      <div class="result-content">
+        <h2 class="result-title" id="result-title">VICTORY</h2>
+        <div class="result-grade" id="result-grade">S</div>
+        <div class="result-stats">
+          <div class="result-row"><span>WPM</span><span id="res-wpm">0</span></div>
+          <div class="result-row"><span>ACCURACY</span><span id="res-acc">0%</span></div>
+          <div class="result-row"><span>DAMAGE DEALT</span><span id="res-dmg">0</span></div>
+          <div class="result-row"><span>MAX COMBO</span><span id="res-combo">0</span></div>
+          <div class="result-row"><span>HITS LANDED</span><span id="res-words">0</span></div>
+          <div class="result-row"><span>MISTAKES</span><span id="res-mistakes">0</span></div>
+          <div class="result-row"><span>FEVERS</span><span id="res-fever">0</span></div>
+          <div class="result-row"><span>TIME</span><span id="res-time">0:00</span></div>
+        </div>
+        <div class="result-moves" id="res-moves"></div>
+        <div class="result-buttons">
+          <button class="pixel-btn btn-green" id="retry-btn">&#9654; RETRY</button>
+          <button class="pixel-btn btn-blue" id="menu-btn">&#9664; MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRACTICE SCREEN -->
+    <div id="practice-screen" class="overlay">
+      <div class="practice-panel">
+        <div class="practice-header">
+          <span class="practice-title">TYPEFIGHT <span class="practice-accent">PRACTICE</span></span>
+          <button class="pixel-btn btn-blue practice-back-btn" id="practice-back-btn">&#9664; BACK</button>
+        </div>
+
+        <div class="practice-main">
+          <div class="practice-target-wrap">
+            <span class="practice-label">PRESS THE KEY</span>
+            <div class="practice-key" id="practice-target">A</div>
+          </div>
+
+          <div class="practice-keyboard" id="practice-keyboard"></div>
+
+          <div class="practice-message" id="practice-message">LETTERS: ALL 26</div>
+        </div>
+
+        <div class="practice-stats">
+          <div class="pstat"><span class="pstat-label">HITS</span><span class="pstat-value" id="practice-score">0</span></div>
+          <div class="pstat"><span class="pstat-label">MISTAKES</span><span class="pstat-value" id="practice-mistakes">0</span></div>
+          <div class="pstat"><span class="pstat-label">ACCURACY</span><span class="pstat-value" id="practice-accuracy">100%</span></div>
+          <div class="pstat"><span class="pstat-label">WPM</span><span class="pstat-value" id="practice-wpm">0</span></div>
+          <div class="pstat"><span class="pstat-label">TIME</span><span class="pstat-value" id="practice-time">0:00</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
