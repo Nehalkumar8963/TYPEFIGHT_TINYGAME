@@ -35,11 +35,19 @@ html, body {
   image-rendering: pixelated;
 }
 
+html.touch body {
+  position: fixed; inset: 0;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
 #game-wrapper {
   position: relative;
   width: 100vw; height: 100vh;
+  height: 100dvh;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg-dark);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 #game-container {
@@ -1211,6 +1219,8 @@ html, body {
    ============================================= */
 .touch body,
 .touch .overlay,
+.touch #rotate-prompt,
+.touch button,
 .touch .pkey,
 .touch .fk-key {
   -webkit-user-select: none;
@@ -1306,8 +1316,137 @@ html, body {
 @media (max-width: 1240px) {
   #game-container {
     width: min(100vw, calc(100vh * 2));
+    width: min(100vw, calc(100dvh * 2));
     height: calc(min(100vw, calc(100vh * 2)) / 2);
+    height: calc(min(100vw, calc(100dvh * 2)) / 2);
   }
+}
+
+/* =============================================
+   MOBILE: ROTATE PROMPT (portrait, touch only)
+   ============================================= */
+#rotate-prompt {
+  display: none;
+  position: absolute; inset: 0;
+  z-index: 70;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background:
+    radial-gradient(ellipse 100% 80% at 50% 30%, rgba(25,18,53,0.96), rgba(8,5,18,0.99) 78%);
+  pointer-events: auto;
+}
+
+.rotate-phone {
+  position: relative;
+  width: 74px; height: 128px;
+  border: 6px solid #6a6a96;
+  border-radius: 12px;
+  background: #141428;
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.6), 0 0 24px rgba(0,255,255,0.25);
+  animation: rotatePhone 2.2s cubic-bezier(0.6, -0.28, 0.74, 0.05) infinite;
+}
+
+.rotate-phone::after {
+  content: '';
+  position: absolute; top: 8px; left: 50%;
+  transform: translateX(-50%);
+  width: 26px; height: 5px;
+  border-radius: 3px;
+  background: #6a6a96;
+}
+
+.rotate-phone-screen {
+  position: absolute; inset: 26px 8px 10px;
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, #ff2442 0 12%, transparent 12% 100%),
+    linear-gradient(90deg, rgba(57,255,20,0.5), rgba(0,255,255,0.5));
+  background-size: auto, auto;
+  border: 2px solid #3a3a5c;
+}
+
+@keyframes rotatePhone {
+  0% { transform: rotate(0deg); }
+  55%, 100% { transform: rotate(90deg); }
+}
+
+.rotate-title {
+  font-family: var(--pixel-font);
+  font-size: 18px;
+  letter-spacing: 4px;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 12px rgba(0,255,255,0.7), 3px 3px 0 var(--pixel-shadow);
+  animation: blink 1.2s step-end infinite;
+}
+
+.rotate-sub {
+  font-family: var(--pixel-font);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+}
+
+@media (orientation: portrait) and (max-width: 1240px) {
+  .touch #rotate-prompt {
+    display: flex;
+  }
+}
+
+/* =============================================
+   MOBILE: COMPACT SHORT-LANDSCAPE LAYOUT
+   (phones ~640x360 / 740x360 heights below 480)
+   ============================================= */
+@media (max-height: 480px) {
+  /* Menu */
+  .title-glow { font-size: 30px; }
+  .subtitle { font-size: 8px; margin-top: 6px; }
+  .menu-content { gap: 8px; padding: 10px 0; }
+  .menu-label { font-size: 8px; margin-bottom: 5px; }
+  .menu-section:first-of-type { padding-top: 6px; }
+  .pixel-btn { font-size: 9px; padding: 6px 12px; box-shadow: 3px 3px 0 var(--pixel-shadow); }
+  .pixel-btn:active { box-shadow: 1px 1px 0 var(--pixel-shadow); }
+  #level-btns .pixel-btn { font-size: 9px; padding: 5px 8px; min-width: 30px; }
+  .menu-section { gap: 6px; }
+
+  /* HUD */
+  #hud { padding: 5px 10px; }
+  .pixel-hp-bar { height: 16px; border-width: 2px; }
+  .hp-name { font-size: 7px; }
+  .hp-text { font-size: 7px; }
+  .hud-center-stats { gap: 2px; min-width: 0; }
+  .stat-chip { font-size: 7px; padding: 2px 6px; }
+  .stat-chip.small { font-size: 7px; padding: 1px 5px; }
+  #mode-indicator, #distance-display { display: none; }
+  #combo-display { font-size: 9px; }
+  .energy-hint { display: none; }
+  .letter-queue-area { margin: 2px 0; }
+
+  /* Fight + practice keyboards */
+  .touch #fight-keyboard { gap: 2px; padding: 2px 6px; }
+  .touch .fk-key { height: 20px; font-size: 8px; max-width: 38px; }
+  .touch .fk-key.fk-space { max-width: 110px; min-width: 70px; }
+  .touch .practice-keyboard { gap: 3px; }
+  .touch .pkey { height: 22px; font-size: 8px; }
+
+  /* Practice screen */
+  #practice-screen { padding: 8px; }
+  .practice-panel { gap: 5px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .practice-mode-row .mode-btn { font-size: 8px; padding: 5px 9px; }
+  .practice-key { font-size: 34px; }
+
+  /* Result */
+  .result-content { padding: 14px 18px; gap: 8px; }
+  .result-title { font-size: 20px; }
+  .result-grade { font-size: 32px; padding: 8px 18px; }
+  .res-progress-cell { width: 26px; height: 20px; }
+}
+
+/* hide scrollbars on scrollable panels (desktop + touch) */
+.menu-content::-webkit-scrollbar,
+.touch .practice-panel::-webkit-scrollbar {
+  display: none;
 }
 
 /* =============================================

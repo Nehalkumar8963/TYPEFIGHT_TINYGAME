@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>TYPEFIGHT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,6 +13,15 @@
   <div id="game-wrapper">
     <div id="crt-overlay"></div>
     <div id="game-container"></div>
+
+    <!-- PORTRAIT / ROTATE PROMPT (touch devices only) -->
+    <div id="rotate-prompt">
+      <div class="rotate-phone">
+        <div class="rotate-phone-screen"></div>
+      </div>
+      <p class="rotate-title">ROTATE YOUR DEVICE</p>
+      <p class="rotate-sub">端末を横に向けてください</p>
+    </div>
 
     <!-- MAIN MENU OVERLAY -->
     <div id="main-menu" class="overlay active">
