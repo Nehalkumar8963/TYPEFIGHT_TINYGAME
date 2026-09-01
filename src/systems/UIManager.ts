@@ -1,6 +1,7 @@
 import type { AttackGrade, LetterEvent, CombatMode, EnemyInstance } from '../types';
 import { COMBAT_MOVES } from '../config';
 import type { CombatMove } from '../types';
+import { TouchKeyboard } from './TouchKeyboard';
 
 export class UIManager {
   private el = (id: string) => document.getElementById(id)!;
@@ -64,7 +65,8 @@ export class UIManager {
     if (keyWrap) keyWrap.style.display = isLetters ? '' : 'none';
     if (wordWrap) wordWrap.style.display = (mode === 'words' || mode === 'timed') ? '' : 'none';
     if (fallArea) fallArea.style.display = isFall ? '' : 'none';
-    if (keyboard) keyboard.style.display = isFall ? 'none' : '';
+    const hideKeyboardOnFall = isFall && !TouchKeyboard.enabled();
+    if (keyboard) keyboard.style.display = hideKeyboardOnFall ? 'none' : '';
     if (message) message.style.display = isFall ? 'none' : '';
   }
 
@@ -351,6 +353,7 @@ export class UIManager {
   renderLetterQueue(letters: readonly LetterEvent[]) {
     const container = this.el('letter-queue');
     container.innerHTML = '';
+    this.updateFightTarget(letters.length > 0 ? letters[0].key : null);
 
     if (letters.length === 0) {
       const waiting = document.createElement('div');
@@ -381,6 +384,48 @@ export class UIManager {
         </div>
       `;
       container.appendChild(el);
+    });
+  }
+
+  renderFightKeyboard() {
+    if (!TouchKeyboard.enabled()) return;
+    const kb = this.el('fight-keyboard');
+    if (!kb || kb.getAttribute('data-built')) return;
+    kb.setAttribute('data-built', '1');
+
+    const rows = [
+      ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+      ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+      ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
+    ];
+    rows.forEach(row => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'fk-row';
+      row.forEach(letter => {
+        const key = document.createElement('div');
+        key.className = 'fk-key';
+        key.setAttribute('data-key', letter);
+        key.textContent = letter.toUpperCase();
+        rowEl.appendChild(key);
+      });
+      kb.appendChild(rowEl);
+    });
+    const spaceRow = document.createElement('div');
+    spaceRow.className = 'fk-row fk-space-row';
+    const space = document.createElement('div');
+    space.className = 'fk-key fk-space';
+    space.setAttribute('data-key', ' ');
+    space.textContent = 'SPACE';
+    spaceRow.appendChild(space);
+    kb.appendChild(spaceRow);
+  }
+
+  updateFightTarget(targetKey: string | null) {
+    if (!TouchKeyboard.enabled()) return;
+    const kb = this.el('fight-keyboard');
+    if (!kb || !kb.getAttribute('data-built')) return;
+    kb.querySelectorAll('.fk-key').forEach(k => {
+      k.classList.toggle('tk-target', k.getAttribute('data-key') === targetKey);
     });
   }
 

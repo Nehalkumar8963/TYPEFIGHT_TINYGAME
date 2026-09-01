@@ -4,6 +4,7 @@ import { MenuScene } from './scenes/MenuScene';
 import { FightScene } from './scenes/FightScene';
 import { ResultScene } from './scenes/ResultScene';
 import { PracticeScene } from './scenes/PracticeScene';
+import { TouchKeyboard } from './systems/TouchKeyboard';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -24,4 +25,5 @@ const config: Phaser.Types.Core.GameConfig = {
   },
 };
 
+TouchKeyboard.init();
 new Phaser.Game(config);

@@ -16,6 +16,10 @@ import { CombatEngine } from '../systems/CombatEngine';
 import { UIManager } from '../systems/UIManager';
 import { SoundEngine } from '../systems/SoundEngine';
 import { resetLetterPools } from '../letters';
+import {
+  drawSun, drawTorii, drawMountainRange, drawHanko, drawGrain,
+  drawLantern, drawSeigaihaStrip, drawTatami, drawBamboo,
+} from '../textures';
 
 export class FightScene extends Phaser.Scene {
   private player!: PixelCharacter;
@@ -140,18 +144,49 @@ export class FightScene extends Phaser.Scene {
     const lc = this.levelConfig;
     const [bgR, bgG, bgB] = lc.bgGradient;
 
-    // Gradient sky
+    // Gradient sky with subtle banding for arcade poster feel
     for (let y = 0; y < GROUND_Y; y += 3) {
       const t = y / GROUND_Y;
-      const r = Math.floor(bgR + t * 12);
-      const g = Math.floor(bgG + t * 8);
-      const b = Math.floor(bgB + t * 16);
+      const r = Math.floor(bgR + t * 14);
+      const g = Math.floor(bgG + t * 10);
+      const b = Math.floor(bgB + t * 20);
       gfx.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
       gfx.fillRect(0, y, GAME_WIDTH, 3);
     }
 
-    // Grid lines
-    gfx.lineStyle(1, lc.accentColor, 0.08);
+    // Big retro sun hugging the horizon
+    drawSun(
+      gfx,
+      GAME_WIDTH - 220,
+      GROUND_Y - 120,
+      86,
+      lc.accentColor,
+      0.4
+    );
+
+    // Far mountain silhouettes (two depths)
+    drawMountainRange(gfx, GROUND_Y, Phaser.Display.Color.GetColor(bgR + 30, bgG + 26, bgB + 40), 0.5, [
+      { x: 120, w: 380, h: 150 },
+      { x: 620, w: 460, h: 200 },
+      { x: 1050, w: 320, h: 120 },
+    ]);
+    drawMountainRange(gfx, GROUND_Y, Phaser.Display.Color.GetColor(bgR + 16, bgG + 13, bgB + 22), 0.75, [
+      { x: 40, w: 260, h: 100 },
+      { x: 430, w: 300, h: 130 },
+      { x: 820, w: 340, h: 150 },
+      { x: 1120, w: 220, h: 80 },
+    ]);
+
+    // Faint torii on the horizon for temple-ish themes
+    if (lc.theme === 'dojo' || lc.theme === 'temple' || lc.theme === 'palace') {
+      drawTorii(gfx, GAME_WIDTH / 2, GROUND_Y, 1, 0x12070c, 0.35);
+    }
+
+    // Coarse grain gives the sky hand-drawn texture
+    drawGrain(gfx, 0, 0, GAME_WIDTH, GROUND_Y, 0xffffff, 0.05, 220, lc.id * 17 + 3);
+
+    // Faint perspective grid
+    gfx.lineStyle(1, lc.accentColor, 0.06);
     for (let x = 0; x < GAME_WIDTH; x += 32) {
       gfx.beginPath(); gfx.moveTo(x, 0); gfx.lineTo(x, GROUND_Y); gfx.strokePath();
     }
@@ -162,27 +197,52 @@ export class FightScene extends Phaser.Scene {
     // Theme-specific background decorations
     this.drawThemeDecorations(gfx, lc);
 
-    // Ground
+    // Kanji hanko seals floating in the sky
+    const seals: Array<[number, number, number, number]> = [
+      [180, 90, 26, 0], [GAME_WIDTH - 190, 150, 26, 1], [540, 60, 20, 2],
+    ];
+    for (const [sx, sy, ss, sv] of seals) {
+      drawHanko(gfx, sx, sy, ss, lc.accentColor, 0.14, sv + lc.id);
+    }
+
+    // ---- GROUND ----
     gfx.fillStyle(lc.groundColor);
     gfx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y);
 
-    // Ground accent line
-    gfx.fillStyle(lc.accentColor, 0.45);
-    gfx.fillRect(0, GROUND_Y, GAME_WIDTH, 2);
+    // Perspective depth bands on the top strip of the ground
+    const perspOffsets = [6, 14, 26, 42, 62, 86];
+    gfx.fillStyle(lc.accentColor, 0.1);
+    for (const off of perspOffsets) {
+      gfx.fillRect(0, GROUND_Y + off, GAME_WIDTH, 1);
+    }
+
+    // Ground accent lines
+    gfx.fillStyle(lc.accentColor, 0.5);
+    gfx.fillRect(0, GROUND_Y, GAME_WIDTH, 3);
     gfx.fillStyle(lc.accentColor, 0.2);
-    gfx.fillRect(0, GROUND_Y + 2, GAME_WIDTH, 2);
+    gfx.fillRect(0, GROUND_Y + 4, GAME_WIDTH, 2);
 
-    // Ground tile pattern
-    gfx.fillStyle(lc.accentColor, 0.12);
-    for (let x = 0; x < GAME_WIDTH; x += 48) {
-      gfx.fillRect(x, GROUND_Y + 8, 24, 2);
-    }
-    for (let x = 24; x < GAME_WIDTH; x += 48) {
-      gfx.fillRect(x, GROUND_Y + 20, 16, 2);
+    // Tatami lattice for dojo/temple/palace, light tiles otherwise
+    if (lc.theme === 'dojo' || lc.theme === 'temple' || lc.theme === 'palace') {
+      drawTatami(gfx, 0, GROUND_Y + 8, GAME_WIDTH, GAME_HEIGHT - GROUND_Y - 8, lc.accentColor, 0.09, 26);
+    } else {
+      gfx.fillStyle(lc.accentColor, 0.1);
+      for (let x = 0; x < GAME_WIDTH; x += 48) {
+        gfx.fillRect(x + 6, GROUND_Y + 14, 22, 3);
+      }
+      for (let x = 24; x < GAME_WIDTH; x += 48) {
+        gfx.fillRect(x + 4, GROUND_Y + 28, 16, 3);
+      }
     }
 
-    // Floating particles
-    for (let i = 0; i < 25; i++) {
+    // Grain on the ground too
+    drawGrain(gfx, 0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y, 0x000000, 0.12, 120, lc.id * 31 + 5);
+
+    // Seigaiha wave strip at the very bottom
+    drawSeigaihaStrip(gfx, 0, GAME_HEIGHT - 6, GAME_WIDTH, 16, lc.accentColor, 0.18);
+
+    // Floating ember particles
+    for (let i = 0; i < 20; i++) {
       const dot = this.add.graphics();
       dot.setDepth(1);
       const c = Phaser.Utils.Array.GetRandom(lc.starColors);
@@ -200,71 +260,105 @@ export class FightScene extends Phaser.Scene {
         delay: Phaser.Math.Between(0, 2000),
       });
     }
+
+    // Sakura petals drifting for nature themes
+    if (['dojo', 'temple', 'palace', 'dragon'].includes(lc.theme)) {
+      for (let i = 0; i < 10; i++) {
+        const petal = this.add.graphics();
+        petal.setDepth(1);
+        const px = Phaser.Math.Between(40, GAME_WIDTH - 40);
+        const py = Phaser.Math.Between(20, GROUND_Y - 30);
+        const pink = [0xff9fcf, 0xffc4dd, 0xff7bb8];
+        petal.fillStyle(Phaser.Utils.Array.GetRandom(pink), Phaser.Math.FloatBetween(0.2, 0.5));
+        petal.fillRect(0, 0, 4, 3);
+        this.tweens.add({
+          targets: petal,
+          x: { from: px, to: px + Phaser.Math.Between(-70, 70) },
+          y: { from: py, to: py + Phaser.Math.Between(60, 160) },
+          duration: Phaser.Math.Between(4000, 8000),
+          repeat: -1, yoyo: true,
+          ease: 'Sine.easeInOut',
+          delay: Phaser.Math.Between(0, 3000),
+        });
+        this.tweens.add({
+          targets: petal,
+          alpha: { from: 0.2, to: 0.6 },
+          duration: Phaser.Math.Between(1500, 3000),
+          yoyo: true, repeat: -1,
+        });
+      }
+    }
   }
 
   private drawThemeDecorations(gfx: Phaser.GameObjects.Graphics, lc: LevelConfig) {
-    switch (lc.theme) {
-      case 'dojo': {
+    const themes: Record<string, () => void> = {
+      dojo: () => {
         // Wooden pillars
         gfx.fillStyle(0x8b4513, 0.3);
         gfx.fillRect(80, 100, 12, GROUND_Y - 100);
         gfx.fillRect(GAME_WIDTH - 92, 100, 12, GROUND_Y - 100);
-        // Torii gate outline
-        gfx.fillStyle(0xcc3333, 0.15);
-        gfx.fillRect(60, 80, GAME_WIDTH - 120, 6);
-        gfx.fillRect(70, 86, 6, 40);
-        gfx.fillRect(GAME_WIDTH - 76, 86, 6, 40);
-        break;
-      }
-      case 'alley': {
+        // Bamboo grove
+        drawBamboo(gfx, 220, GROUND_Y, 170, 0x2f7d3a, 0.4);
+        drawBamboo(gfx, 240, GROUND_Y, 130, 0x2f7d3a, 0.32);
+        drawBamboo(gfx, 980, GROUND_Y, 150, 0x2f7d3a, 0.4);
+        drawBamboo(gfx, 1000, GROUND_Y, 180, 0x2f7d3a, 0.32);
+        // Lantern
+        drawLantern(gfx, GAME_WIDTH - 130, 120, 14, 0xff6600, 0.25);
+      },
+      alley: () => {
         // Brick walls
         gfx.fillStyle(0x3a2a1a, 0.3);
         for (let y = 60; y < GROUND_Y; y += 16) {
-          for (let x = 0; x < 60; x += 24) {
-            gfx.fillRect(x, y, 22, 14);
-          }
-          for (let x = GAME_WIDTH - 60; x < GAME_WIDTH; x += 24) {
-            gfx.fillRect(x, y, 22, 14);
-          }
+          for (let x = 0; x < 60; x += 24) { gfx.fillRect(x, y, 22, 14); }
+          for (let x = GAME_WIDTH - 60; x < GAME_WIDTH; x += 24) { gfx.fillRect(x, y, 22, 14); }
         }
         // Neon signs
         gfx.fillStyle(0xff00ff, 0.1);
         gfx.fillRect(20, 120, 30, 15);
         gfx.fillStyle(0x00ffff, 0.08);
         gfx.fillRect(GAME_WIDTH - 50, 180, 30, 12);
-        break;
-      }
-      case 'temple': {
-        // Pagoda silhouettes
-        gfx.fillStyle(0x440022, 0.2);
+        // Hanging lanterns
+        drawLantern(gfx, 60, 60, 12, 0xff2442, 0.2);
+        drawLantern(gfx, GAME_WIDTH - 60, 80, 12, 0xff2442, 0.2);
+      },
+      temple: () => {
+        // Pagoda silhouette
+        gfx.fillStyle(0x440022, 0.22);
         gfx.fillRect(40, 120, 60, GROUND_Y - 120);
         gfx.fillRect(30, 110, 80, 10);
         gfx.fillRect(20, 100, 100, 10);
+        gfx.fillRect(12, 90, 116, 10);
         gfx.fillRect(GAME_WIDTH - 100, 150, 60, GROUND_Y - 150);
         gfx.fillRect(GAME_WIDTH - 110, 140, 80, 10);
+        gfx.fillRect(GAME_WIDTH - 120, 130, 100, 10);
         // Floating lanterns
-        gfx.fillStyle(0xff6600, 0.15);
-        gfx.fillRect(200, 80, 8, 12);
-        gfx.fillRect(600, 60, 8, 12);
-        gfx.fillRect(900, 90, 8, 12);
-        break;
-      }
-      case 'volcano': {
+        drawLantern(gfx, 200, 80, 12, 0xff6600, 0.3);
+        drawLantern(gfx, 600, 60, 12, 0xff6600, 0.22);
+        drawLantern(gfx, 900, 90, 12, 0xff6600, 0.28);
+        // Bell
+        gfx.fillStyle(0xffd700, 0.16);
+        gfx.fillRect(GAME_WIDTH - 210, 150, 18, 16);
+        gfx.fillRect(GAME_WIDTH - 214, 146, 26, 4);
+      },
+      volcano: () => {
         // Lava streams
-        gfx.fillStyle(0xff2200, 0.1);
+        gfx.fillStyle(0xff2200, 0.12);
         gfx.fillRect(100, GROUND_Y - 4, 3, 4);
         gfx.fillRect(400, GROUND_Y - 4, 2, 4);
         gfx.fillRect(700, GROUND_Y - 4, 4, 4);
         gfx.fillRect(1000, GROUND_Y - 4, 3, 4);
-        // Smoke particles
-        gfx.fillStyle(0x666666, 0.08);
-        gfx.fillRect(120, 60, 20, 30);
-        gfx.fillRect(900, 40, 25, 35);
-        break;
-      }
-      case 'space': {
+        // Smoke plumes
+        for (let i = 0; i < 6; i++) {
+          gfx.fillStyle(0x666666, 0.07);
+          gfx.fillRect(110 + i * 14, 40 + Math.floor(Phaser.Math.Between(0, 20)), 14 + i * 2, 18);
+        }
+        gfx.fillStyle(0x3a3a3a, 0.1);
+        gfx.fillRect(880, 50, 30, 26);
+        gfx.fillRect(900, 30, 34, 20);
+      },
+      space: () => {
         // Stars
-        for (let i = 0; i < 40; i++) {
+        for (let i = 0; i < 50; i++) {
           const sx = Phaser.Math.Between(0, GAME_WIDTH);
           const sy = Phaser.Math.Between(0, GROUND_Y - 20);
           const ss = Phaser.Math.Between(1, 3);
@@ -272,13 +366,17 @@ export class FightScene extends Phaser.Scene {
           gfx.fillRect(sx, sy, ss, ss);
         }
         // Planet
-        gfx.fillStyle(0x0066cc, 0.12);
-        gfx.fillCircle(GAME_WIDTH - 120, 100, 40);
+        gfx.fillStyle(0x0066cc, 0.14);
+        gfx.fillCircle(GAME_WIDTH - 120, 100, 42);
         gfx.fillStyle(0x0044aa, 0.08);
-        gfx.fillRect(GAME_WIDTH - 160, 98, 80, 4);
-        break;
-      }
-      case 'void': {
+        gfx.fillRect(GAME_WIDTH - 162, 98, 84, 4);
+        // Shuttle silhouette
+        gfx.fillStyle(0x222244, 0.5);
+        gfx.fillRect(120, 200, 26, 6);
+        gfx.fillRect(124, 190, 12, 12);
+        gfx.fillRect(128, 206, 4, 8);
+      },
+      void: () => {
         // Swirling void energy
         for (let i = 0; i < 8; i++) {
           const vx = Phaser.Math.Between(100, GAME_WIDTH - 100);
@@ -286,27 +384,38 @@ export class FightScene extends Phaser.Scene {
           gfx.fillStyle(0x6a0dad, 0.06);
           gfx.fillCircle(vx, vy, Phaser.Math.Between(15, 35));
         }
-        break;
-      }
-      case 'palace': {
+        // Torn paper strips
+        for (let i = 0; i < 4; i++) {
+          gfx.fillStyle(0x2d1b4e, 0.25);
+          gfx.fillRect(Phaser.Math.Between(100, GAME_WIDTH - 120), Phaser.Math.Between(80, 300), 3, 60);
+        }
+      },
+      palace: () => {
         // Golden pillars
         gfx.fillStyle(0xffd700, 0.1);
         gfx.fillRect(100, 80, 10, GROUND_Y - 80);
         gfx.fillRect(GAME_WIDTH - 110, 80, 10, GROUND_Y - 80);
         gfx.fillRect(300, 120, 8, GROUND_Y - 120);
         gfx.fillRect(GAME_WIDTH - 308, 120, 8, GROUND_Y - 120);
-        // Crown emblem
+        // Emblem
+        gfx.fillStyle(0xffd700, 0.1);
+        gfx.fillRect(GAME_WIDTH / 2 - 20, 46, 40, 8);
+        gfx.fillRect(GAME_WIDTH / 2 - 15, 38, 30, 8);
+        gfx.fillRect(GAME_WIDTH / 2 - 10, 32, 20, 6);
+        // Roof curves at corners
         gfx.fillStyle(0xffd700, 0.08);
-        gfx.fillRect(GAME_WIDTH / 2 - 20, 40, 40, 8);
-        gfx.fillRect(GAME_WIDTH / 2 - 15, 32, 30, 8);
-        gfx.fillRect(GAME_WIDTH / 2 - 10, 26, 20, 6);
-        break;
-      }
-      case 'throne': {
-        // Demon pillars with skulls
-        gfx.fillStyle(0x440000, 0.25);
+        gfx.fillRect(90, 92, 30, 4);
+        gfx.fillRect(GAME_WIDTH - 120, 92, 30, 4);
+      },
+      throne: () => {
+        // Demon pillars
+        gfx.fillStyle(0x440000, 0.28);
         gfx.fillRect(60, 60, 16, GROUND_Y - 60);
         gfx.fillRect(GAME_WIDTH - 76, 60, 16, GROUND_Y - 60);
+        // Foul flames at their bases
+        gfx.fillStyle(0xff2200, 0.12);
+        gfx.fillRect(56, GROUND_Y - 14, 24, 12);
+        gfx.fillRect(GAME_WIDTH - 80, GROUND_Y - 14, 24, 12);
         // Red energy veins
         gfx.lineStyle(2, 0xff0000, 0.06);
         gfx.beginPath();
@@ -315,36 +424,43 @@ export class FightScene extends Phaser.Scene {
           gfx.lineTo(GAME_WIDTH / 2 + Math.sin(vy * 0.05) * 60, vy);
         }
         gfx.strokePath();
-        break;
-      }
-      case 'shadow': {
+      },
+      shadow: () => {
         // Shadow clones
-        gfx.fillStyle(0x2d1b4e, 0.08);
+        gfx.fillStyle(0x2d1b4e, 0.1);
         gfx.fillRect(350, 180, 16, 50);
         gfx.fillRect(800, 200, 14, 45);
         gfx.fillRect(500, 160, 12, 55);
-        // Purple mist
-        gfx.fillStyle(0x9932cc, 0.04);
-        gfx.fillRect(0, GROUND_Y - 20, GAME_WIDTH, 20);
-        break;
-      }
-      case 'dragon': {
+        // Purple mist over ground
+        gfx.fillStyle(0x9932cc, 0.05);
+        gfx.fillRect(0, GROUND_Y - 30, GAME_WIDTH, 30);
+        // Creepy distant eyes
+        gfx.fillStyle(0xff00ff, 0.16);
+        gfx.fillRect(300, 150, 3, 3);
+        gfx.fillRect(320, 150, 3, 3);
+        gfx.fillRect(860, 180, 3, 3);
+        gfx.fillRect(886, 182, 3, 3);
+      },
+      dragon: () => {
         // Dragon scales on walls
-        gfx.fillStyle(0x006400, 0.1);
+        gfx.fillStyle(0x006400, 0.12);
         for (let dy = 60; dy < GROUND_Y; dy += 20) {
-          for (let dx = 0; dx < 50; dx += 12) {
-            gfx.fillCircle(dx + 6, dy + 10, 5);
-          }
-          for (let dx = GAME_WIDTH - 50; dx < GAME_WIDTH; dx += 12) {
-            gfx.fillCircle(dx + 6, dy + 10, 5);
-          }
+          for (let dx = 0; dx < 50; dx += 12) { gfx.fillCircle(dx + 6, dy + 10, 5); }
+          for (let dx = GAME_WIDTH - 50; dx < GAME_WIDTH; dx += 12) { gfx.fillCircle(dx + 6, dy + 10, 5); }
         }
         // Fire breath glow
-        gfx.fillStyle(0xff4500, 0.06);
+        gfx.fillStyle(0xff4500, 0.07);
         gfx.fillCircle(GAME_WIDTH / 2, GROUND_Y - 80, 60);
-        break;
-      }
-    }
+        // Treasure pile
+        gfx.fillStyle(0xffd700, 0.2);
+        gfx.fillRect(120, GROUND_Y - 18, 34, 8);
+        gfx.fillRect(130, GROUND_Y - 26, 16, 10);
+        gfx.fillStyle(0x00ffff, 0.2);
+        gfx.fillRect(140, GROUND_Y - 22, 8, 6);
+      },
+    };
+    const draw = themes[lc.theme];
+    if (draw) draw();
   }
 
   private createCharacters() {
@@ -391,6 +507,7 @@ export class FightScene extends Phaser.Scene {
 
   private startUI() {
     this.ui.showHud();
+    this.ui.renderFightKeyboard();
     this.ui.setEnemyName(
       this.levelRoster && this.levelRoster.length > 1 ? 'HOSTILES' : this.enemyConfig.name
     );

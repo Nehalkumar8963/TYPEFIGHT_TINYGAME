@@ -3,6 +3,10 @@ import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, ENEMY_CONFIGS, PLAYER_SPRITE_CONFIG,
 import type { Difficulty, EnemyType } from '../types';
 import { PixelCharacter } from '../entities/PixelCharacter';
 import { SoundEngine } from '../systems/SoundEngine';
+import {
+  drawSun, drawTorii, drawMountainRange, drawHanko, drawGrain,
+  drawSeigaihaStrip, drawTatami,
+} from '../textures';
 
 export class MenuScene extends Phaser.Scene {
   private selectedDifficulty: Difficulty = 'normal';
@@ -23,24 +27,64 @@ export class MenuScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#0a0a12');
 
     const gfx = this.add.graphics();
-    gfx.fillStyle(0x1a1a2e);
-    gfx.fillRect(0, GAME_HEIGHT - 40, GAME_WIDTH, 40);
-    gfx.fillStyle(0x2a2a4e);
-    for (let x = 0; x < GAME_WIDTH; x += 20) {
-      gfx.fillRect(x, GAME_HEIGHT - 40, 10, 2);
+
+    // -- Sky gradient (indigo-to-crimson dusk) --
+    for (let y = 0; y < GROUND_Y; y += 3) {
+      const t = y / GROUND_Y;
+      const r = Math.floor(8 + t * 22);
+      const g = Math.floor(6 + t * 8);
+      const b = Math.floor(20 + t * 26);
+      gfx.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
+      gfx.fillRect(0, y, GAME_WIDTH, 3);
     }
 
-    gfx.fillStyle(0x141428, 0.3);
+    // -- Rising sun --
+    drawSun(gfx, GAME_WIDTH - 210, GROUND_Y - 150, 100, 0xff2442, 0.5);
+
+    // -- Layered mountains --
+    drawMountainRange(gfx, GROUND_Y, 0x2a1030, 0.6, [
+      { x: 140, w: 420, h: 170 },
+      { x: 660, w: 480, h: 220 },
+      { x: 1060, w: 300, h: 140 },
+    ]);
+    drawMountainRange(gfx, GROUND_Y, 0x1a0b22, 0.85, [
+      { x: 60, w: 280, h: 110 },
+      { x: 460, w: 340, h: 150 },
+      { x: 860, w: 320, h: 130 },
+    ]);
+
+    // -- Torii gates flanking the arena --
+    drawTorii(gfx, 90, GROUND_Y, 1.1, 0x12060c, 0.75);
+    drawTorii(gfx, GAME_WIDTH - 118, GROUND_Y, 1.1, 0x12060c, 0.75);
+
+    // -- Grain + faint grid texture --
+    drawGrain(gfx, 0, 0, GAME_WIDTH, GROUND_Y, 0xffffff, 0.05, 200, 7);
+    gfx.lineStyle(1, 0xffffff, 0.03);
     for (let x = 0; x < GAME_WIDTH; x += 40) {
-      gfx.fillRect(x, 0, 1, GAME_HEIGHT);
+      gfx.beginPath(); gfx.moveTo(x, 0); gfx.lineTo(x, GROUND_Y); gfx.strokePath();
     }
-    for (let y = 0; y < GAME_HEIGHT; y += 40) {
-      gfx.fillRect(0, y, GAME_WIDTH, 1);
+    for (let y = 0; y < GROUND_Y; y += 40) {
+      gfx.beginPath(); gfx.moveTo(0, y); gfx.lineTo(GAME_WIDTH, y); gfx.strokePath();
     }
 
+    // -- Kanji seals across the sky --
+    drawHanko(gfx, 320, 90, 30, 0xff2442, 0.18, 1);
+    drawHanko(gfx, 680, 60, 24, 0xff2442, 0.13, 2);
+    drawHanko(gfx, 940, 130, 30, 0xff2442, 0.16, 0);
+
+    // -- Floor: tatami + bottom wave border --
+    gfx.fillStyle(0x151023);
+    gfx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y);
+    drawTatami(gfx, 0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y, 0xffffff, 0.08, 24);
+    gfx.fillStyle(0xff2442, 0.4);
+    gfx.fillRect(0, GROUND_Y, GAME_WIDTH, 3);
+    drawSeigaihaStrip(gfx, 0, GAME_HEIGHT - 6, GAME_WIDTH, 18, 0xff2442, 0.3);
+    drawGrain(gfx, 0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y, 0x000000, 0.12, 100, 11);
+
+    // -- Twinkling stars --
     for (let i = 0; i < 25; i++) {
       const px = Phaser.Math.Between(0, GAME_WIDTH);
-      const py = Phaser.Math.Between(0, GAME_HEIGHT - 60);
+      const py = Phaser.Math.Between(0, Math.floor(GROUND_Y * 0.6));
       const dot = this.add.graphics();
       const colors = [0x39ff14, 0x00ffff, 0xff00ff, 0xffe600];
       dot.fillStyle(Phaser.Utils.Array.GetRandom(colors), 0.3);
@@ -52,6 +96,31 @@ export class MenuScene extends Phaser.Scene {
         duration: Phaser.Math.Between(1000, 3000),
         yoyo: true, repeat: -1,
         delay: Phaser.Math.Between(0, 2000),
+      });
+    }
+
+    // -- Drifting sakura petals --
+    for (let i = 0; i < 12; i++) {
+      const petal = this.add.graphics();
+      const px = Phaser.Math.Between(40, GAME_WIDTH - 40);
+      const py = Phaser.Math.Between(20, GROUND_Y - 40);
+      const pinks = [0xff9fcf, 0xffc4dd, 0xff7bb8];
+      petal.fillStyle(Phaser.Utils.Array.GetRandom(pinks), Phaser.Math.FloatBetween(0.2, 0.5));
+      petal.fillRect(0, 0, 4, 3);
+      this.tweens.add({
+        targets: petal,
+        x: { from: px, to: px + Phaser.Math.Between(-80, 80) },
+        y: { from: py, to: py + Phaser.Math.Between(70, 170) },
+        duration: Phaser.Math.Between(4000, 9000),
+        repeat: -1, yoyo: true,
+        ease: 'Sine.easeInOut',
+        delay: Phaser.Math.Between(0, 3000),
+      });
+      this.tweens.add({
+        targets: petal,
+        alpha: { from: 0.2, to: 0.6 },
+        duration: Phaser.Math.Between(1500, 3000),
+        yoyo: true, repeat: -1,
       });
     }
 
@@ -215,14 +284,21 @@ export class MenuScene extends Phaser.Scene {
     this.playerPreview.update(delta);
     this.enemyPreview.update(delta);
 
-    // Animated title glow ring
+    // Animated title: sun ring + hanko seals
     const t = Date.now() * 0.0015;
     this.titleFx.clear();
-    this.titleFx.fillStyle(0x39ff14, 0.04 + Math.sin(t) * 0.02);
-    this.titleFx.fillRect(GAME_WIDTH / 2 - 130, 40, 260, 60);
 
-    this.titleFx.lineStyle(2, 0x39ff14, 0.2 + Math.sin(t) * 0.1);
-    this.titleFx.strokeRect(GAME_WIDTH / 2 - 130, 40, 260, 60);
+    // Retro sun disc behind the title text
+    const pulse = 0.16 + Math.sin(t) * 0.05;
+    this.titleFx.fillStyle(0xff2442, pulse * 0.5);
+    this.titleFx.fillCircle(GAME_WIDTH / 2, 62, 40);
+    this.titleFx.lineStyle(2, 0xff2442, pulse);
+    this.titleFx.strokeCircle(GAME_WIDTH / 2, 62, 46);
+    this.titleFx.strokeCircle(GAME_WIDTH / 2, 62, 40);
+
+    // Red hanko seals at the title corners
+    drawHanko(this.titleFx, GAME_WIDTH / 2 - 178, 58, 30, 0xff2442, 0.35 + Math.sin(t) * 0.1, 1);
+    drawHanko(this.titleFx, GAME_WIDTH / 2 + 178, 58, 30, 0xff2442, 0.35 + Math.sin(t) * 0.1, 2);
   }
 
   shutdown() {

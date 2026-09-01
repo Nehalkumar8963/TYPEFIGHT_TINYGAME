@@ -4,6 +4,10 @@ import { UIManager } from '../systems/UIManager';
 import { SoundEngine } from '../systems/SoundEngine';
 import { getAllLetters } from '../letters';
 import { getRandomWord } from '../typingWords';
+import { TouchKeyboard } from '../systems/TouchKeyboard';
+import {
+  drawSun, drawTorii, drawMountainRange, drawGrain, drawSeigaihaStrip,
+} from '../textures';
 
 type PracticeMode = 'letters' | 'words' | 'timed' | 'fall';
 
@@ -85,21 +89,43 @@ export class PracticeScene extends Phaser.Scene {
 
   private drawBackground() {
     const gfx = this.add.graphics();
-    gfx.fillStyle(0x0d0d1e);
-    gfx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    gfx.lineStyle(1, 0x1a1a3e, 0.12);
-    for (let x = 0; x < GAME_WIDTH; x += 48) {
-      gfx.beginPath(); gfx.moveTo(x, 0); gfx.lineTo(x, GAME_HEIGHT); gfx.strokePath();
+    // Sky gradient
+    for (let y = 0; y < GROUND_Y; y += 3) {
+      const t = y / GROUND_Y;
+      const r = Math.floor(10 + t * 14);
+      const g = Math.floor(10 + t * 8);
+      const b = Math.floor(22 + t * 22);
+      gfx.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
+      gfx.fillRect(0, y, GAME_WIDTH, 3);
     }
-    for (let y = 0; y < GAME_HEIGHT; y += 48) {
+
+    // Faint sun + mountains for a dojo vista
+    drawSun(gfx, GAME_WIDTH - 190, GROUND_Y - 110, 70, 0xff2442, 0.35);
+    drawMountainRange(gfx, GROUND_Y, 0x151030, 0.7, [
+      { x: 120, w: 420, h: 130 },
+      { x: 620, w: 380, h: 170 },
+      { x: 980, w: 300, h: 100 },
+    ]);
+    drawTorii(gfx, 260, GROUND_Y, 0.9, 0x0e0712, 0.4);
+
+    drawGrain(gfx, 0, 0, GAME_WIDTH, GROUND_Y, 0xffffff, 0.04, 160, 13);
+
+    gfx.lineStyle(1, 0x3a2a4e, 0.08);
+    for (let x = 0; x < GAME_WIDTH; x += 48) {
+      gfx.beginPath(); gfx.moveTo(x, 0); gfx.lineTo(x, GROUND_Y); gfx.strokePath();
+    }
+    for (let y = 0; y < GROUND_Y; y += 48) {
       gfx.beginPath(); gfx.moveTo(0, y); gfx.lineTo(GAME_WIDTH, y); gfx.strokePath();
     }
 
+    // Floor
     gfx.fillStyle(0x1a1a2e);
     gfx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y);
-    gfx.fillStyle(0x39ff14, 0.2);
+    drawSeigaihaStrip(gfx, 0, GAME_HEIGHT - 6, GAME_WIDTH, 16, 0x39ff14, 0.14);
+    gfx.fillStyle(0x39ff14, 0.25);
     gfx.fillRect(0, GROUND_Y, GAME_WIDTH, 2);
+    drawGrain(gfx, 0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y, 0x000000, 0.12, 90, 19);
   }
 
   private wireButtons() {
@@ -189,6 +215,9 @@ export class PracticeScene extends Phaser.Scene {
       this.fallFieldW = 0;
       this.fallFieldH = 0;
       this.ui.renderPracticeFallHud(0, this.fallLives, FALL_START_LIVES);
+      if (TouchKeyboard.enabled()) {
+        this.ui.renderPracticeKeyboard(getAllLetters(), '');
+      }
       this.sessionActive = true;
       this.startTime = performance.now();
     } else {

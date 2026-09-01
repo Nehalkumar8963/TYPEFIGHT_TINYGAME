@@ -3,6 +3,7 @@ import { GAME_WIDTH, GAME_HEIGHT, LEVEL_CONFIGS } from '../config';
 import type { FightStats } from '../types';
 import { UIManager } from '../systems/UIManager';
 import { SoundEngine } from '../systems/SoundEngine';
+import { drawSun, drawGrain, drawSeigaihaStrip } from '../textures';
 
 export class ResultScene extends Phaser.Scene {
   private ui!: UIManager;
@@ -34,16 +35,38 @@ export class ResultScene extends Phaser.Scene {
     });
 
     const gfx = this.add.graphics();
-    gfx.fillStyle(0x0d0d2b);
-    gfx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    gfx.lineStyle(1, 0x1a1a3e, 0.2);
+    // Dusk gradient + rising sun tinted by win/loss
+    for (let y = 0; y < 300; y += 3) {
+      const t = y / 300;
+      const r = Math.floor(9 + t * 16);
+      const g = Math.floor(8 + t * 8);
+      const b = Math.floor(22 + t * 26);
+      gfx.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
+      gfx.fillRect(0, y, GAME_WIDTH, 3);
+    }
+    gfx.fillStyle(0x120e24);
+    gfx.fillRect(0, 300, GAME_WIDTH, GAME_HEIGHT - 300);
+
+    drawSun(
+      gfx,
+      stats.victory ? GAME_WIDTH - 180 : 180,
+      220, 90,
+      stats.victory ? 0xffd700 : 0xff2442,
+      0.35
+    );
+
+    drawGrain(gfx, 0, 0, GAME_WIDTH, GAME_HEIGHT, 0xffffff, 0.04, 180, 23);
+
+    gfx.lineStyle(1, 0x1a1a3e, 0.15);
     for (let x = 0; x < GAME_WIDTH; x += 40) {
       gfx.beginPath(); gfx.moveTo(x, 0); gfx.lineTo(x, GAME_HEIGHT); gfx.strokePath();
     }
     for (let y = 0; y < GAME_HEIGHT; y += 40) {
       gfx.beginPath(); gfx.moveTo(0, y); gfx.lineTo(GAME_WIDTH, y); gfx.strokePath();
     }
+
+    drawSeigaihaStrip(gfx, 0, GAME_HEIGHT - 6, GAME_WIDTH, 18, 0xff2442, 0.2);
 
     for (let i = 0; i < 15; i++) {
       const dot = this.add.graphics();
