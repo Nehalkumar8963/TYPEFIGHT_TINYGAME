@@ -32,54 +32,74 @@
           <p class="subtitle">PRESS KEYS &bull; DEAL DAMAGE &bull; WIN</p>
         </div>
 
-        <div class="menu-section">
-          <p class="menu-label">SELECT LEVEL (1-10)</p>
-          <div class="btn-row" id="level-btns">
-            <button class="pixel-btn btn-green active" data-value="1">1</button>
-            <button class="pixel-btn btn-blue" data-value="2">2</button>
-            <button class="pixel-btn btn-blue" data-value="3">3</button>
-            <button class="pixel-btn btn-yellow" data-value="4">4</button>
-            <button class="pixel-btn btn-yellow" data-value="5">5</button>
-            <button class="pixel-btn btn-yellow" data-value="6">6</button>
-            <button class="pixel-btn btn-red" data-value="7">7</button>
-            <button class="pixel-btn btn-red" data-value="8">8</button>
-            <button class="pixel-btn btn-red" data-value="9">9</button>
-            <button class="pixel-btn btn-red" data-value="10">10</button>
+        <div class="menu-panel">
+          <!-- LEVEL -->
+          <div class="menu-section">
+            <div class="section-head">
+              <span class="menu-label">LEVEL</span>
+              <div class="level-progress" id="level-progress"></div>
+            </div>
+            <div class="level-selector">
+              <button class="pxl-arrow" id="level-prev" aria-label="Previous level">&#9664;</button>
+              <div class="level-indicator">
+                <span class="level-num" id="level-num">01</span>
+                <span class="level-name" id="level-name">THE DOJO</span>
+              </div>
+              <button class="pxl-arrow" id="level-next" aria-label="Next level">&#9654;</button>
+            </div>
+            <div class="btn-row level-row" id="level-btns">
+              <button class="pixel-btn lb-btn btn-green active" data-value="1">1</button>
+              <button class="pixel-btn lb-btn btn-blue" data-value="2">2</button>
+              <button class="pixel-btn lb-btn btn-blue" data-value="3">3</button>
+              <button class="pixel-btn lb-btn btn-yellow" data-value="4">4</button>
+              <button class="pixel-btn lb-btn btn-yellow" data-value="5">5</button>
+              <button class="pixel-btn lb-btn btn-yellow" data-value="6">6</button>
+              <button class="pixel-btn lb-btn btn-red" data-value="7">7</button>
+              <button class="pixel-btn lb-btn btn-red" data-value="8">8</button>
+              <button class="pixel-btn lb-btn btn-red" data-value="9">9</button>
+              <button class="pixel-btn lb-btn btn-red" data-value="10">10</button>
+            </div>
+            <div class="level-desc" id="level-desc">Your training begins.</div>
           </div>
-          <div class="level-desc" id="level-desc">LVL 1: THE DOJO - Your training begins.</div>
+
+          <!-- DIFFICULTY -->
+          <div class="menu-section">
+            <span class="menu-label">DIFFICULTY</span>
+            <div class="btn-row difficulty-row" id="difficulty-btns">
+              <button class="pixel-btn diff-btn btn-green" data-value="easy">EASY</button>
+              <button class="pixel-btn diff-btn btn-blue active" data-value="normal">NORMAL</button>
+              <button class="pixel-btn diff-btn btn-yellow" data-value="hard">HARD</button>
+              <button class="pixel-btn diff-btn btn-red" data-value="insane">INSANE</button>
+            </div>
+          </div>
+
+          <!-- OPPONENT -->
+          <div class="menu-section">
+            <div class="section-head">
+              <span class="menu-label">OPPONENT</span>
+            </div>
+            <div class="opponent-selector">
+              <button class="pxl-arrow" id="opp-prev" aria-label="Previous opponent">&#9664;</button>
+              <div class="opponent-display" id="opponent-display">
+                <span class="opponent-name" id="opponent-name">FIGHTER</span>
+              </div>
+              <button class="pxl-arrow" id="opp-next" aria-label="Next opponent">&#9654;</button>
+            </div>
+            <div class="opponent-tagline" id="opponent-tagline">Balanced combatant</div>
+          </div>
+
+          <!-- PRIMARY ACTION -->
+          <button class="pixel-btn btn-start" id="start-btn">&#9654; START FIGHT</button>
+          <button class="pixel-btn btn-practice" id="practice-btn">PRACTICE MODE</button>
         </div>
 
-        <div class="menu-section">
-          <p class="menu-label">CUSTOM DIFFICULTY</p>
-          <div class="btn-row" id="difficulty-btns">
-            <button class="pixel-btn btn-green" data-value="easy">EASY</button>
-            <button class="pixel-btn btn-blue active" data-value="normal">NORMAL</button>
-            <button class="pixel-btn btn-yellow" data-value="hard">HARD</button>
-            <button class="pixel-btn btn-red" data-value="insane">INSANE</button>
-          </div>
+        <!-- SETTINGS -->
+        <div class="menu-settings">
+          <button class="pixel-btn btn-blue sfx-menu-btn" id="menu-sfx-toggle">&#128266; SFX ON</button>
         </div>
 
-        <div class="menu-section">
-          <p class="menu-label">CUSTOM OPPONENT</p>
-          <div class="btn-row" id="enemy-btns">
-            <button class="pixel-btn btn-green" data-value="rookie">ROOKIE</button>
-            <button class="pixel-btn btn-blue active" data-value="fighter">FIGHTER</button>
-            <button class="pixel-btn btn-yellow" data-value="ninja">NINJA</button>
-            <button class="pixel-btn btn-red" data-value="boss">BOSS</button>
-            <button class="pixel-btn btn-red" data-value="samurai">SAMURAI</button>
-            <button class="pixel-btn btn-blue" data-value="assassin">ASSASSIN</button>
-            <button class="pixel-btn btn-yellow" data-value="warlord">WARLORD</button>
-            <button class="pixel-btn btn-red" data-value="demon">DEMON</button>
-            <button class="pixel-btn btn-blue" data-value="shadow">SHADOW</button>
-            <button class="pixel-btn btn-green" data-value="dragon">DRAGON</button>
-          </div>
-        </div>
-
-        <button class="pixel-btn btn-start" id="start-btn">&#9654; START FIGHT</button>
-        <button class="pixel-btn btn-practice" id="practice-btn">&#9679; PRACTICE</button>
-        <button class="pixel-btn btn-blue" id="menu-sfx-toggle">SFX ON</button>
-
-        <p class="blink-text">INSERT COIN TO CONTINUE</p>
+        <!-- ARCADE FOOTER -->
+        <p class="blink-text">INSERT COIN &bull; PRESS ENTER</p>
       </div>
     </div>
 

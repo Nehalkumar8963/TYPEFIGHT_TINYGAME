@@ -146,6 +146,21 @@ export class MenuScene extends Phaser.Scene {
     (window as any).__menuScene = this;
   }
 
+  // Opponent cycle order + short arcade taglines
+  private opponentOrder: EnemyType[] = ['rookie', 'fighter', 'ninja', 'boss', 'samurai', 'assassin', 'warlord', 'demon', 'shadow', 'dragon'];
+  private opponentTaglines: Record<EnemyType, string> = {
+    rookie: 'Fresh off the street',
+    fighter: 'Balanced combatant',
+    ninja: 'Fast. Silent. Deadly.',
+    boss: 'Heavyweight bruiser',
+    samurai: 'Honor-bound bladesman',
+    assassin: 'Strikes from the dark',
+    warlord: 'Unstoppable war machine',
+    demon: 'Born of pure flame',
+    shadow: 'Hunts in the black',
+    dragon: 'The final legend',
+  };
+
   private setupMenuListeners() {
     const safeClick = (cb: () => void) => {
       if (!this.scene.isActive()) return;
@@ -153,6 +168,7 @@ export class MenuScene extends Phaser.Scene {
       cb();
     };
 
+    // Difficulty segmented selector
     const diffBtns = document.querySelectorAll('#difficulty-btns .pixel-btn');
     diffBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -165,43 +181,39 @@ export class MenuScene extends Phaser.Scene {
       });
     });
 
-    const enemyBtns = document.querySelectorAll('#enemy-btns .pixel-btn');
-    enemyBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        safeClick(() => {
-          enemyBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          this.selectedEnemy = (btn as HTMLElement).dataset.value as EnemyType;
-          this.usingCustom = true;
-          this.swapEnemyPreview(this.selectedEnemy);
-        });
-      });
-    });
-
-    // Level select
+    // Level: direct pick from the numbered row
     const levelBtns = document.querySelectorAll('#level-btns .pixel-btn');
     levelBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        safeClick(() => {
-          levelBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const lvl = Number((btn as HTMLElement).dataset.value);
-          this.selectedLevel = lvl;
-          this.usingCustom = false;
-          this.applyLevelDefaults(lvl);
-        });
+        const lvl = Number((btn as HTMLElement).dataset.value);
+        safeClick(() => this.selectLevel(lvl));
       });
     });
 
-    // Level info
-    const levelDesc = document.getElementById('level-desc');
-    const updateLevelDesc = () => {
-      if (levelDesc) {
-        const lvl = LEVEL_CONFIGS[this.selectedLevel - 1];
-        levelDesc.textContent = `LVL ${lvl.id}: ${lvl.name} - ${lvl.description}`;
-      }
-    };
-    updateLevelDesc();
+    // Level: previous / next cycling
+    const prevLevel = document.getElementById('level-prev');
+    const nextLevel = document.getElementById('level-next');
+    if (prevLevel) prevLevel.addEventListener('click', () => {
+      safeClick(() => this.cycleLevel(-1));
+    });
+    if (nextLevel) nextLevel.addEventListener('click', () => {
+      safeClick(() => this.cycleLevel(1));
+    });
+
+    // Opponent: previous / next cycling
+    const prevOpp = document.getElementById('opp-prev');
+    const nextOpp = document.getElementById('opp-next');
+    if (prevOpp) prevOpp.addEventListener('click', () => {
+      safeClick(() => this.cycleOpponent(-1));
+    });
+    if (nextOpp) nextOpp.addEventListener('click', () => {
+      safeClick(() => this.cycleOpponent(1));
+    });
+
+    // Initial render of progress dots + selections
+    this.buildLevelProgress();
+    this.renderLevel();
+    this.renderOpponent();
 
     document.getElementById('start-btn')!.addEventListener('click', () => {
       safeClick(() => this.startFight());
@@ -222,11 +234,11 @@ export class MenuScene extends Phaser.Scene {
       sfxBtn.onclick = (e) => {
         e.stopPropagation();
         this.sfx.toggleMuted();
-        sfxBtn.textContent = this.sfx.isMuted ? 'SFX OFF' : 'SFX ON';
+        sfxBtn.textContent = this.sfx.isMuted ? '\uD83D\uDD0A SFX OFF' : '\uD83D\uDD0A SFX ON';
         sfxBtn.classList.toggle('muted', this.sfx.isMuted);
         if (!this.sfx.isMuted) this.sfx.uiClick();
       };
-      sfxBtn.textContent = this.sfx.isMuted ? 'SFX OFF' : 'SFX ON';
+      sfxBtn.textContent = this.sfx.isMuted ? '\uD83D\uDD0A SFX OFF' : '\uD83D\uDD0A SFX ON';
     }
 
     document.getElementById('main-menu')!.classList.add('active');
@@ -234,6 +246,69 @@ export class MenuScene extends Phaser.Scene {
     document.getElementById('result-screen')!.classList.remove('active');
     const practice = document.getElementById('practice-screen');
     if (practice) practice.classList.remove('active');
+  }
+
+  private selectLevel(level: number) {
+    this.selectedLevel = Math.min(Math.max(level, 1), LEVEL_CONFIGS.length);
+    this.usingCustom = false;
+    this.applyLevelDefaults(this.selectedLevel);
+  }
+
+  private cycleLevel(dir: 1 | -1) {
+    const max = LEVEL_CONFIGS.length;
+    this.selectedLevel = ((this.selectedLevel - 1 + dir + max) % max) + 1;
+    this.usingCustom = false;
+    this.applyLevelDefaults(this.selectedLevel);
+  }
+
+  private cycleOpponent(dir: 1 | -1) {
+    const idx = this.opponentOrder.indexOf(this.selectedEnemy);
+    const next = (idx + dir + this.opponentOrder.length) % this.opponentOrder.length;
+    this.selectedEnemy = this.opponentOrder[next];
+    this.usingCustom = true;
+    this.renderOpponent();
+    this.swapEnemyPreview(this.selectedEnemy);
+  }
+
+  private buildLevelProgress() {
+    const wrap = document.getElementById('level-progress');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    let maxCleared = 0;
+    try { maxCleared = Number(localStorage.getItem('typefight_max_level') || '0'); } catch { /* ignore */ }
+    LEVEL_CONFIGS.forEach((_, i) => {
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      if (i + 1 === this.selectedLevel) dot.classList.add('active');
+      else if (i < maxCleared) dot.classList.add('cleared');
+      wrap.appendChild(dot);
+    });
+  }
+
+  private renderLevel() {
+    const num = document.getElementById('level-num');
+    const name = document.getElementById('level-name');
+    const desc = document.getElementById('level-desc');
+    const lvl = LEVEL_CONFIGS[Math.min(this.selectedLevel - 1, LEVEL_CONFIGS.length - 1)];
+    if (num) {
+      num.textContent = String(lvl.id).padStart(2, '0');
+    }
+    if (name) name.textContent = lvl.name;
+    if (desc) desc.textContent = lvl.description;
+
+    const levelBtns = document.querySelectorAll('#level-btns .pixel-btn');
+    levelBtns.forEach(b => {
+      b.classList.toggle('active', Number((b as HTMLElement).dataset.value) === this.selectedLevel);
+    });
+
+    this.buildLevelProgress();
+  }
+
+  private renderOpponent() {
+    const name = document.getElementById('opponent-name');
+    const tagline = document.getElementById('opponent-tagline');
+    if (name) name.textContent = ENEMY_CONFIGS[this.selectedEnemy].name;
+    if (tagline) tagline.textContent = this.opponentTaglines[this.selectedEnemy];
   }
 
   private swapEnemyPreview(enemyType: EnemyType) {
@@ -255,18 +330,12 @@ export class MenuScene extends Phaser.Scene {
 
     // Set enemy to the level's first enemy type
     const firstType = lvl.enemyTypes[0];
-    const enemyBtns = document.querySelectorAll('#enemy-btns .pixel-btn');
-    enemyBtns.forEach(b => {
-      b.classList.toggle('active', (b as HTMLElement).dataset.value === firstType);
-    });
     this.selectedEnemy = firstType;
     this.swapEnemyPreview(firstType);
 
-    // Update level description
-    const levelDesc = document.getElementById('level-desc');
-    if (levelDesc) {
-      levelDesc.textContent = `LVL ${lvl.id}: ${lvl.name} - ${lvl.description}`;
-    }
+    // Update level + opponent UI
+    this.renderLevel();
+    this.renderOpponent();
   }
 
   private startFight() {

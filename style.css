@@ -123,17 +123,22 @@ html.touch body {
 
 .menu-content {
   position: relative; z-index: 2;
-  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
   margin: auto;
   max-height: 100%;
   overflow-y: auto;
-  padding: 16px 0;
+  padding: 20px 20px;
+  width: 100%;
 }
 
-.title-block { text-align: center; margin-bottom: 4px; }
+/* -- Header -- */
+.title-block {
+  text-align: center;
+  padding: 4px 0 8px;
+}
 
 .title-glow {
-  font-family: var(--pixel-font); font-size: 52px;
+  font-family: var(--pixel-font); font-size: 46px;
   color: var(--text-bright);
   text-shadow: 0 0 10px rgba(57,255,20,0.8), 0 0 30px rgba(57,255,20,0.4),
     0 0 60px rgba(57,255,20,0.2), 3px 3px 0 var(--pixel-shadow);
@@ -153,43 +158,239 @@ html.touch body {
 }
 
 .subtitle {
-  font-family: var(--pixel-font); font-size: 10px;
-  color: var(--text-dim); letter-spacing: 3px; margin-top: 10px;
+  font-family: var(--pixel-font); font-size: 9px;
+  color: var(--text-dim); letter-spacing: 3px; margin-top: 12px;
 }
 
-/* CONTROLS HINT */
-.controls-hint {
-  display: flex; flex-direction: column; gap: 4px;
-  background: rgba(20,20,40,0.7);
-  border: 2px solid var(--pixel-border);
-  padding: 10px 16px;
-  margin-bottom: 4px;
+/* -- Arcade menu panel -- */
+.menu-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  max-width: 520px;
+  background:
+    linear-gradient(180deg, rgba(16,11,34,0.92), rgba(10,6,24,0.9));
+  border: 2px solid rgba(255,215,0,0.18);
+  box-shadow:
+    inset 0 0 40px rgba(0,0,0,0.6),
+    0 0 34px rgba(255,36,66,0.10);
+  padding: 28px 40px 30px;
+  position: relative;
 }
 
-.hint-row {
-  display: flex; align-items: center; gap: 10px;
+.menu-section {
+  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
 }
 
-.hint-key {
-  font-family: var(--pixel-font); font-size: 10px;
-  letter-spacing: 2px; min-width: 100px;
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 2px;
 }
-
-.hint-label {
-  font-family: var(--pixel-font); font-size: 8px;
-  color: var(--text-dim); letter-spacing: 1px;
-}
-
-.menu-section { text-align: center; }
 
 .menu-label {
   font-family: var(--pixel-font); font-size: 10px;
   color: var(--neon-cyan);
   text-shadow: 0 0 8px rgba(0,255,255,0.5);
-  margin-bottom: 8px; letter-spacing: 2px;
+  letter-spacing: 3px;
 }
 
-.btn-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+.difficulty-row .pixel-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 10px;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+/* -- Level selector -- */
+.level-selector {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  justify-content: center;
+}
+
+.level-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.level-num {
+  font-family: var(--pixel-font);
+  font-size: 44px;
+  color: var(--text-bright);
+  text-shadow: 0 0 16px rgba(255,215,0,0.5), 3px 3px 0 var(--pixel-shadow);
+  line-height: 1;
+  letter-spacing: 2px;
+}
+
+.level-name {
+  font-family: var(--pixel-font);
+  font-size: 11px;
+  color: var(--jp-gold);
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255,215,0,0.5);
+}
+
+.level-progress {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.level-progress .dot {
+  width: 8px;
+  height: 8px;
+  background: var(--pixel-border);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.level-progress .dot.active {
+  background: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0,255,255,0.7);
+}
+
+.level-progress .dot.cleared {
+  background: var(--neon-green);
+  box-shadow: 0 0 6px rgba(57,255,20,0.5);
+}
+
+/* -- Arrow control (shared level + opponent) -- */
+.pxl-arrow {
+  font-family: var(--pixel-font);
+  font-size: 16px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--pixel-border);
+  background: var(--bg-panel);
+  color: var(--neon-cyan);
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--pixel-shadow);
+  image-rendering: pixelated;
+  transition: none;
+  flex-shrink: 0;
+}
+
+.pxl-arrow:hover {
+  background: var(--bg-panel-alt);
+  border-color: var(--neon-cyan);
+  box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 12px rgba(0,255,255,0.35);
+}
+
+.pxl-arrow:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+}
+
+/* -- Compact numbered level row (direct pick 1-10) -- */
+.level-row {
+  width: 100%;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.level-row .lb-btn {
+  flex: 1;
+  min-width: 0;
+  max-width: 40px;
+  padding: 8px 0;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* -- Opponent selector -- */
+.opponent-selector {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  justify-content: center;
+}
+
+.opponent-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  max-width: 240px;
+  border: 3px solid var(--pixel-border);
+  background: rgba(26,26,46,0.7);
+  box-shadow: 4px 4px 0 var(--pixel-shadow), inset 0 0 18px rgba(0,0,0,0.5);
+  padding: 18px 12px;
+  position: relative;
+}
+
+.opponent-name {
+  font-family: var(--pixel-font);
+  font-size: 16px;
+  color: var(--text-bright);
+  letter-spacing: 3px;
+  text-shadow: 0 0 12px rgba(255,36,66,0.5), 2px 2px 0 var(--pixel-shadow);
+}
+
+.opponent-tagline {
+  font-family: var(--pixel-font);
+  font-size: 8px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.level-desc {
+  font-family: var(--pixel-font); font-size: 8px;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 6px rgba(0,255,255,0.4);
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* -- Settings row (audio) -- */
+.menu-settings {
+  display: flex;
+  justify-content: center;
+}
+
+.sfx-menu-btn {
+  font-size: 10px;
+  padding: 9px 16px;
+  border-color: var(--pixel-border);
+  color: var(--text-primary);
+  background: rgba(26,26,46,0.5);
+  box-shadow: 3px 3px 0 var(--pixel-shadow);
+}
+.sfx-menu-btn:hover {
+  border-color: var(--neon-blue);
+  color: var(--neon-blue);
+  background: rgba(77,124,255,0.1);
+}
+
+.blink-text {
+  font-family: var(--pixel-font); font-size: 8px;
+  color: var(--text-dim); letter-spacing: 2px;
+  animation: blink 1.2s step-end infinite;
+}
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 .pixel-btn {
   font-family: var(--pixel-font); font-size: 11px;
@@ -228,14 +429,22 @@ html.touch body {
 .btn-red.active    { border-color: var(--neon-red);    color: var(--neon-red);    background: rgba(255,36,66,0.08); }
 
 .btn-start {
-  font-size: 14px; padding: 14px 36px; margin-top: 4px;
+  font-size: 16px; padding: 20px 48px; margin-top: 8px;
   border-color: var(--neon-green); color: var(--neon-green);
-  background: rgba(57,255,20,0.1);
-  box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 20px rgba(57,255,20,0.2);
+  background: rgba(57,255,20,0.12);
+  box-shadow: 5px 5px 0 var(--pixel-shadow), 0 0 24px rgba(57,255,20,0.25);
+  letter-spacing: 2px;
+  width: 100%;
+  max-width: 320px;
 }
 .btn-start:hover {
-  background: rgba(57,255,20,0.18);
-  box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 30px rgba(57,255,20,0.4);
+  background: rgba(57,255,20,0.2);
+  box-shadow: 5px 5px 0 var(--pixel-shadow), 0 0 36px rgba(57,255,20,0.45);
+}
+
+.btn-start:active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
 }
 
 #next-btn {
@@ -248,29 +457,6 @@ html.touch body {
   background: rgba(255,230,0,0.16);
   box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 30px rgba(255,230,0,0.4);
 }
-
-.level-desc {
-  font-family: var(--pixel-font); font-size: 8px;
-  color: var(--neon-cyan);
-  text-shadow: 0 0 6px rgba(0,255,255,0.4);
-  letter-spacing: 1px;
-  margin-top: 8px;
-  text-align: center;
-}
-
-#level-btns .pixel-btn {
-  font-size: 10px;
-  padding: 8px 12px;
-  min-width: 40px;
-}
-
-.blink-text {
-  font-family: var(--pixel-font); font-size: 9px;
-  color: var(--text-dim); letter-spacing: 2px;
-  animation: blink 1.2s step-end infinite;
-}
-
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 /* HUD */
 #hud {
@@ -796,17 +982,20 @@ html.touch body {
    PRACTICE BUTTON
    ============================================= */
 .btn-practice {
-  font-size: 12px;
-  padding: 12px 24px;
-  margin-top: 4px;
+  font-size: 11px;
+  padding: 11px 28px;
+  margin-top: 2px;
   border-color: var(--neon-cyan);
   color: var(--neon-cyan);
-  background: rgba(0, 255, 255, 0.08);
-  box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 20px rgba(0, 255, 255, 0.2);
+  background: rgba(0, 255, 255, 0.06);
+  box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 16px rgba(0, 255, 255, 0.15);
+  letter-spacing: 1px;
+  width: 100%;
+  max-width: 320px;
 }
 .btn-practice:hover {
-  background: rgba(0, 255, 255, 0.15);
-  box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 30px rgba(0, 255, 255, 0.4);
+  background: rgba(0, 255, 255, 0.13);
+  box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 26px rgba(0, 255, 255, 0.35);
 }
 
 .hint-note {
@@ -1395,20 +1584,51 @@ html.touch body {
 }
 
 /* =============================================
+   MEDIUM / SMALL WINDOWS (e.g. 1280x720, 1366x768)
+   Shrink decorative elements, keep sections stacked and readable.
+   ============================================= */
+@media (max-height: 760px), (max-width: 900px) {
+  .title-glow { font-size: 34px; }
+  .subtitle { font-size: 8px; margin-top: 8px; }
+  .menu-content { gap: 12px; padding: 14px 16px; }
+  .menu-panel { gap: 20px; padding: 20px 28px 22px; max-width: 440px; }
+  .menu-section { gap: 10px; }
+  .level-num { font-size: 34px; }
+  .level-indicator { min-width: 150px; }
+  .pxl-arrow { width: 42px; height: 42px; font-size: 14px; }
+  .opponent-display { padding: 14px 10px; max-width: 200px; }
+  .opponent-name { font-size: 14px; }
+  .btn-start { font-size: 14px; padding: 16px 38px; max-width: 290px; }
+  .btn-practice { font-size: 10px; padding: 10px 24px; max-width: 290px; }
+  .level-row .lb-btn { max-width: 32px; padding: 6px 0; font-size: 9px; }
+  .blink-text { font-size: 7px; }
+}
+
+/* =============================================
    MOBILE: COMPACT SHORT-LANDSCAPE LAYOUT
    (phones ~640x360 / 740x360 heights below 480)
    ============================================= */
 @media (max-height: 480px) {
   /* Menu */
-  .title-glow { font-size: 30px; }
-  .subtitle { font-size: 8px; margin-top: 6px; }
-  .menu-content { gap: 8px; padding: 10px 0; }
-  .menu-label { font-size: 8px; margin-bottom: 5px; }
-  .menu-section:first-of-type { padding-top: 6px; }
+  .title-glow { font-size: 26px; }
+  .subtitle { font-size: 7px; margin-top: 6px; }
+  .menu-content { gap: 8px; padding: 10px 12px; }
+  .menu-label { font-size: 8px; margin-bottom: 4px; }
   .pixel-btn { font-size: 9px; padding: 6px 12px; box-shadow: 3px 3px 0 var(--pixel-shadow); }
   .pixel-btn:active { box-shadow: 1px 1px 0 var(--pixel-shadow); }
-  #level-btns .pixel-btn { font-size: 9px; padding: 5px 8px; min-width: 30px; }
-  .menu-section { gap: 6px; }
+  .menu-panel { gap: 16px; padding: 16px 20px 18px; max-width: 440px; }
+  .menu-section { gap: 8px; }
+  .level-num { font-size: 30px; }
+  .level-name { font-size: 9px; }
+  .level-indicator { min-width: 140px; }
+  .pxl-arrow { width: 38px; height: 38px; font-size: 13px; }
+  .opponent-display { padding: 10px 8px; max-width: 180px; }
+  .opponent-name { font-size: 12px; }
+  .btn-start { font-size: 13px; padding: 13px 30px; max-width: 260px; }
+  .btn-practice { font-size: 9px; padding: 8px 20px; max-width: 260px; }
+  .level-row .lb-btn { max-width: 26px; padding: 5px 0; font-size: 8px; }
+  .difficulty-row .pixel-btn { padding: 8px 6px; font-size: 8px; }
+  .menu-settings { margin-top: -4px; }
 
   /* HUD */
   #hud { padding: 5px 10px; }
@@ -1519,54 +1739,49 @@ html.touch body {
 }
 
 /* -- Menu: washi panel with bracket corners behind the options -- */
-.menu-content {
-  background: rgba(12,8,26,0.4);
-  padding: 14px 26px;
-  border: 2px solid rgba(255,215,0,0.16);
+.menu-panel {
+  background:
+    linear-gradient(180deg, rgba(16,11,34,0.94), rgba(10,6,24,0.92));
+  border: 2px solid rgba(255,215,0,0.18);
   box-shadow:
-    inset 0 0 24px rgba(0,0,0,0.5),
-    0 0 30px rgba(255,36,66,0.08);
+    inset 0 0 40px rgba(0,0,0,0.6),
+    0 0 34px rgba(255,36,66,0.10);
   position: relative;
 }
-.menu-content::before {
+.menu-panel::before {
   content: '斗';
-  position: absolute; top: -6px; left: -2px;
+  position: absolute; top: 8px; left: 10px;
   font-family: var(--jp-font);
   font-size: 10px;
   color: var(--jp-gold);
   opacity: 0.5;
+  pointer-events: none;
 }
-.menu-content::after {
+.menu-panel::after {
   content: '肉彈';
-  position: absolute; right: 12px; bottom: -2px;
+  position: absolute; right: 12px; bottom: 8px;
   font-family: var(--jp-font);
   font-size: 10px;
   letter-spacing: 6px;
   color: var(--jp-vermilion);
   opacity: 0.28;
-}
-
-.menu-section:first-of-type {
-  border-top: 2px dashed rgba(255,36,66,0.4);
-  padding-top: 10px;
+  pointer-events: none;
 }
 
 .menu-label {
   color: var(--jp-gold);
   text-shadow: 0 0 8px rgba(255,215,0,0.5);
 }
-#level-btns .pixel-btn.btn-red,
-#enemy-btns .pixel-btn.btn-red { border-color: rgba(230,57,70,0.55); }
 
 .btn-start {
   border-color: var(--jp-vermilion);
   color: var(--jp-vermilion);
   background: rgba(255,36,66,0.1);
-  box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 22px rgba(255,36,66,0.2);
+  box-shadow: 5px 5px 0 var(--pixel-shadow), 0 0 26px rgba(255,36,66,0.25);
 }
 .btn-start:hover {
-  background: rgba(255,36,66,0.18);
-  box-shadow: 4px 4px 0 var(--pixel-shadow), 0 0 34px rgba(255,36,66,0.42);
+  background: rgba(255,36,66,0.2);
+  box-shadow: 5px 5px 0 var(--pixel-shadow), 0 0 40px rgba(255,36,66,0.46);
 }
 
 .blink-text { color: var(--jp-gold); }
