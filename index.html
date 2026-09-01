@@ -23,19 +23,25 @@
           <p class="subtitle">PRESS KEYS &bull; DEAL DAMAGE &bull; WIN</p>
         </div>
 
-        <div class="controls-hint">
-          <div class="hint-row"><span class="hint-key" style="color:#39ff14">A-W-S-Q</span><span class="hint-label">JAB</span></div>
-          <div class="hint-row"><span class="hint-key" style="color:#4d7cff">D-F-E-R</span><span class="hint-label">CROSS</span></div>
-          <div class="hint-row"><span class="hint-key" style="color:#ff6600">T-Y-G-H</span><span class="hint-label">KICK</span></div>
-          <div class="hint-row"><span class="hint-key" style="color:#ff00ff">U-I-J-K</span><span class="hint-label">UPPERCUT</span></div>
-          <div class="hint-row"><span class="hint-key" style="color:#00ffff">O-P-L-;</span><span class="hint-label">SPECIAL</span></div>
-          <div class="hint-row"><span class="hint-key" style="color:#ff2d00">B-N-M</span><span class="hint-label">HAYMAKER</span></div>
-          <div class="hint-row"><span class="hint-key" style="color:#ffffff">C-V-X-Z</span><span class="hint-label">FINISHER</span></div>
-          <div class="hint-note">KEYS SHUFFLE EVERY ROUND &bull; A-Z</div>
+        <div class="menu-section">
+          <p class="menu-label">SELECT LEVEL (1-10)</p>
+          <div class="btn-row" id="level-btns">
+            <button class="pixel-btn btn-green active" data-value="1">1</button>
+            <button class="pixel-btn btn-blue" data-value="2">2</button>
+            <button class="pixel-btn btn-blue" data-value="3">3</button>
+            <button class="pixel-btn btn-yellow" data-value="4">4</button>
+            <button class="pixel-btn btn-yellow" data-value="5">5</button>
+            <button class="pixel-btn btn-yellow" data-value="6">6</button>
+            <button class="pixel-btn btn-red" data-value="7">7</button>
+            <button class="pixel-btn btn-red" data-value="8">8</button>
+            <button class="pixel-btn btn-red" data-value="9">9</button>
+            <button class="pixel-btn btn-red" data-value="10">10</button>
+          </div>
+          <div class="level-desc" id="level-desc">LVL 1: THE DOJO - Your training begins.</div>
         </div>
 
         <div class="menu-section">
-          <p class="menu-label">SELECT DIFFICULTY</p>
+          <p class="menu-label">CUSTOM DIFFICULTY</p>
           <div class="btn-row" id="difficulty-btns">
             <button class="pixel-btn btn-green" data-value="easy">EASY</button>
             <button class="pixel-btn btn-blue active" data-value="normal">NORMAL</button>
@@ -45,17 +51,24 @@
         </div>
 
         <div class="menu-section">
-          <p class="menu-label">SELECT OPPONENT</p>
+          <p class="menu-label">CUSTOM OPPONENT</p>
           <div class="btn-row" id="enemy-btns">
             <button class="pixel-btn btn-green" data-value="rookie">ROOKIE</button>
             <button class="pixel-btn btn-blue active" data-value="fighter">FIGHTER</button>
             <button class="pixel-btn btn-yellow" data-value="ninja">NINJA</button>
             <button class="pixel-btn btn-red" data-value="boss">BOSS</button>
+            <button class="pixel-btn btn-red" data-value="samurai">SAMURAI</button>
+            <button class="pixel-btn btn-blue" data-value="assassin">ASSASSIN</button>
+            <button class="pixel-btn btn-yellow" data-value="warlord">WARLORD</button>
+            <button class="pixel-btn btn-red" data-value="demon">DEMON</button>
+            <button class="pixel-btn btn-blue" data-value="shadow">SHADOW</button>
+            <button class="pixel-btn btn-green" data-value="dragon">DRAGON</button>
           </div>
         </div>
 
         <button class="pixel-btn btn-start" id="start-btn">&#9654; START FIGHT</button>
         <button class="pixel-btn btn-practice" id="practice-btn">&#9679; PRACTICE</button>
+        <button class="pixel-btn btn-blue" id="menu-sfx-toggle">SFX ON</button>
 
         <p class="blink-text">INSERT COIN TO CONTINUE</p>
       </div>
@@ -67,11 +80,14 @@
         <div class="hp-block">
           <span class="hp-name">PLAYER</span>
           <div class="pixel-hp-bar">
+            <div class="pixel-hp-chunk player-hp-chunk" id="player-hp-chunk"></div>
             <div class="pixel-hp-fill player-hp-fill" id="player-hp-fill"></div>
             <span class="hp-text" id="player-hp-text">100</span>
           </div>
         </div>
         <div class="hud-center-stats">
+          <button class="sfx-toggle-btn" id="sfx-toggle" title="Toggle sound effects">SFX ON</button>
+          <div class="stat-chip" id="level-indicator">LVL 1</div>
           <div class="stat-chip" id="combo-display">COMBO x0</div>
           <div class="stat-chip" id="mode-indicator"></div>
           <div class="stat-row">
@@ -83,6 +99,7 @@
         <div class="hp-block enemy-hp-block" id="enemy-hp-block">
           <span class="hp-name" id="enemy-name-label">ENEMY</span>
           <div class="pixel-hp-bar enemy-bar">
+            <div class="pixel-hp-chunk enemy-hp-chunk" id="enemy-hp-chunk"></div>
             <div class="pixel-hp-fill enemy-hp-fill" id="enemy-hp-fill"></div>
             <span class="hp-text" id="enemy-hp-text">100</span>
           </div>
@@ -113,6 +130,7 @@
         <h2 class="result-title" id="result-title">VICTORY</h2>
         <div class="result-grade" id="result-grade">S</div>
         <div class="result-stats">
+          <div class="result-row"><span>LEVEL</span><span id="res-level">1</span></div>
           <div class="result-row"><span>WPM</span><span id="res-wpm">0</span></div>
           <div class="result-row"><span>ACCURACY</span><span id="res-acc">0%</span></div>
           <div class="result-row"><span>DAMAGE DEALT</span><span id="res-dmg">0</span></div>
@@ -123,8 +141,13 @@
           <div class="result-row"><span>TIME</span><span id="res-time">0:00</span></div>
         </div>
         <div class="result-moves" id="res-moves"></div>
+        <div class="res-progress-wrap">
+          <span class="res-progress-label">LEVEL PROGRESS</span>
+          <div class="res-progress" id="res-progress"></div>
+        </div>
         <div class="result-buttons">
           <button class="pixel-btn btn-green" id="retry-btn">&#9654; RETRY</button>
+          <button class="pixel-btn btn-yellow" id="next-btn">&#9654; NEXT LEVEL</button>
           <button class="pixel-btn btn-blue" id="menu-btn">&#9664; MENU</button>
         </div>
       </div>
@@ -138,20 +161,61 @@
           <button class="pixel-btn btn-blue practice-back-btn" id="practice-back-btn">&#9664; BACK</button>
         </div>
 
+        <div class="practice-mode-row" id="practice-mode-row">
+          <button class="pixel-btn btn-green mode-btn active" data-mode="letters">&#9836; LETTERS</button>
+          <button class="pixel-btn btn-blue mode-btn" data-mode="words">&#8212; WORDS</button>
+          <button class="pixel-btn btn-red mode-btn" data-mode="timed">&#9203; TIMED 60S</button>
+          <button class="pixel-btn btn-yellow mode-btn" data-mode="fall">&#9660; FALLING</button>
+          <button class="pixel-btn btn-yellow sfx-practice-btn" id="practice-sfx-toggle">SFX ON</button>
+        </div>
+
         <div class="practice-main">
           <div class="practice-target-wrap">
-            <span class="practice-label">PRESS THE KEY</span>
+            <span class="practice-label" id="practice-label">PRESS THE KEY</span>
             <div class="practice-key" id="practice-target">A</div>
+          </div>
+
+          <div class="practice-word-wrap" id="practice-word-wrap" style="display:none">
+            <span class="practice-label">TYPE THE WORD</span>
+            <div class="practice-word" id="practice-word"></div>
+            <div class="practice-word-sub" id="practice-word-sub">0/0</div>
+          </div>
+
+          <div class="practice-fall-area" id="practice-fall-area" style="display:none">
+            <div class="fall-hud">
+              <div class="fall-lives" id="fall-lives"></div>
+              <div class="fall-score" id="fall-score">SCORE 0</div>
+            </div>
+            <div class="fall-field" id="fall-field">
+              <div class="fall-words" id="fall-words"></div>
+              <div class="fall-danger-line"></div>
+              <div class="fall-danger-label">DANGER</div>
+            </div>
           </div>
 
           <div class="practice-keyboard" id="practice-keyboard"></div>
 
           <div class="practice-message" id="practice-message">LETTERS: ALL 26</div>
+
+          <div class="practice-results" id="practice-results">
+            <h3 class="practice-res-title" id="practice-res-title">TEST COMPLETE</h3>
+            <div class="practice-res-grid">
+              <div class="pstat"><span class="pstat-label" id="practice-res-wpm-label">WPM</span><span class="pstat-value" id="practice-res-wpm">0</span></div>
+              <div class="pstat"><span class="pstat-label" id="practice-res-raw-label">RAW WPM</span><span class="pstat-value" id="practice-res-raw">0</span></div>
+              <div class="pstat"><span class="pstat-label">ACCURACY</span><span class="pstat-value" id="practice-res-acc">0%</span></div>
+              <div class="pstat"><span class="pstat-label">MISTAKES</span><span class="pstat-value" id="practice-res-mistakes">0</span></div>
+              <div class="pstat"><span class="pstat-label">BEST STREAK</span><span class="pstat-value" id="practice-res-streak">0</span></div>
+              <div class="pstat"><span class="pstat-label" id="practice-res-words-label">WORDS</span><span class="pstat-value" id="practice-res-words">0</span></div>
+            </div>
+            <div class="practice-res-note" id="practice-res-note"></div>
+            <button class="pixel-btn btn-green" id="practice-res-again">&#9654; GO AGAIN</button>
+          </div>
         </div>
 
         <div class="practice-stats">
           <div class="pstat"><span class="pstat-label">HITS</span><span class="pstat-value" id="practice-score">0</span></div>
           <div class="pstat"><span class="pstat-label">MISTAKES</span><span class="pstat-value" id="practice-mistakes">0</span></div>
+          <div class="pstat"><span class="pstat-label">STREAK</span><span class="pstat-value" id="practice-streak">0</span></div>
           <div class="pstat"><span class="pstat-label">ACCURACY</span><span class="pstat-value" id="practice-accuracy">100%</span></div>
           <div class="pstat"><span class="pstat-label">WPM</span><span class="pstat-value" id="practice-wpm">0</span></div>
           <div class="pstat"><span class="pstat-label">TIME</span><span class="pstat-value" id="practice-time">0:00</span></div>

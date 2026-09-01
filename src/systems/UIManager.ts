@@ -4,6 +4,8 @@ import type { CombatMove } from '../types';
 
 export class UIManager {
   private el = (id: string) => document.getElementById(id)!;
+  private lastPlayerHp = -1;
+  private lastEnemyHp = -1;
 
   showMenu() {
     this.el('main-menu').classList.add('active');
@@ -38,14 +40,102 @@ export class UIManager {
     this.el('practice-screen').classList.remove('active');
   }
 
-  updatePracticeHud(targetKey: string, score: number, mistakes: number, wpm: number, accuracy: number, elapsedSecs: number) {
+  updatePracticeHud(targetKey: string, score: number, mistakes: number, wpm: number, accuracy: number, displaySecs: number, streak = 0) {
     const target = this.el('practice-target');
     if (target) target.textContent = targetKey.toUpperCase();
     this.el('practice-score').textContent = String(score);
     this.el('practice-mistakes').textContent = String(mistakes);
     this.el('practice-wpm').textContent = `${wpm} WPM`;
     this.el('practice-accuracy').textContent = `${accuracy}%`;
-    this.el('practice-time').textContent = `${Math.floor(elapsedSecs / 60)}:${String(elapsedSecs % 60).padStart(2, '0')}`;
+    const secs = Math.max(0, Math.round(displaySecs));
+    this.el('practice-time').textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+    const streakEl = this.el('practice-streak');
+    if (streakEl) streakEl.textContent = String(streak);
+  }
+
+  setPracticeDisplay(mode: 'letters' | 'words' | 'timed' | 'fall') {
+    const isLetters = mode === 'letters';
+    const isFall = mode === 'fall';
+    const keyWrap = this.el('practice-target-wrap');
+    const wordWrap = this.el('practice-word-wrap');
+    const fallArea = this.el('practice-fall-area');
+    const keyboard = this.el('practice-keyboard');
+    const message = this.el('practice-message');
+    if (keyWrap) keyWrap.style.display = isLetters ? '' : 'none';
+    if (wordWrap) wordWrap.style.display = (mode === 'words' || mode === 'timed') ? '' : 'none';
+    if (fallArea) fallArea.style.display = isFall ? '' : 'none';
+    if (keyboard) keyboard.style.display = isFall ? 'none' : '';
+    if (message) message.style.display = isFall ? 'none' : '';
+  }
+
+  renderPracticeFallHud(score: number, lives: number, maxLives: number) {
+    const scoreEl = this.el('fall-score');
+    if (scoreEl) scoreEl.textContent = `SCORE ${score}`;
+    const livesEl = this.el('fall-lives');
+    if (!livesEl) return;
+    livesEl.innerHTML = '';
+    for (let i = 0; i < maxLives; i++) {
+      const cell = document.createElement('span');
+      cell.className = 'fall-life' + (i < lives ? '' : ' lost');
+      livesEl.appendChild(cell);
+    }
+  }
+
+  clearFallingWords() {
+    const container = this.el('fall-words');
+    if (container) container.innerHTML = '';
+  }
+
+  renderPracticeWord(word: string, charIndex: number) {
+    const el = this.el('practice-word');
+    if (!el) return;
+    let html = '';
+    for (let i = 0; i < word.length; i++) {
+      const cls = i < charIndex ? 'pchar done' : i === charIndex ? 'pchar current' : 'pchar todo';
+      html += `<span class="${cls}">${word[i]}</span>`;
+    }
+    el.innerHTML = html;
+    const sub = this.el('practice-word-sub');
+    if (sub) sub.textContent = `${Math.min(charIndex, word.length)}/${word.length}`;
+  }
+
+  showPracticeResults(r: {
+    wpm?: number; raw?: number; words: number; accuracy: number;
+    mistakes: number; bestStreak: number; newBest: boolean;
+    score?: number; title?: string;
+  }) {
+    const card = this.el('practice-results');
+    if (!card) return;
+    const labelOf = (id: string, fallback: string, custom?: string) => {
+      const el = this.el(id);
+      if (el) el.textContent = custom ?? fallback;
+    };
+
+    if (r.score !== undefined) {
+      labelOf('practice-res-wpm-label', 'WPM', 'SCORE');
+      labelOf('practice-res-raw-label', 'RAW WPM', 'WORDS');
+      labelOf('practice-res-words-label', 'WORDS', 'SURVIVED');
+    } else {
+      labelOf('practice-res-wpm-label', 'WPM');
+      labelOf('practice-res-raw-label', 'RAW WPM');
+      labelOf('practice-res-words-label', 'WORDS');
+    }
+
+    this.el('practice-res-title').textContent = r.title ?? 'TEST COMPLETE';
+    this.el('practice-res-wpm').textContent = String(r.score !== undefined ? r.score : (r.wpm ?? 0));
+    this.el('practice-res-raw').textContent = String(r.raw ?? 0);
+    this.el('practice-res-acc').textContent = `${r.accuracy}%`;
+    this.el('practice-res-mistakes').textContent = String(r.mistakes);
+    this.el('practice-res-streak').textContent = String(r.bestStreak);
+    this.el('practice-res-words').textContent = String(r.words);
+    const note = this.el('practice-res-note');
+    if (note) note.textContent = r.newBest ? 'NEW RECORD!' : 'KEEP PRACTICING!';
+    card.classList.add('show');
+  }
+
+  hidePracticeResults() {
+    const card = this.el('practice-results');
+    if (card) card.classList.remove('show');
   }
 
   renderPracticeKeyboard(letters: string[], targetKey: string) {
@@ -99,6 +189,9 @@ export class UIManager {
     const pct = Math.max(0, (hp / maxHp) * 100);
     const fill = this.el('player-hp-fill');
     fill.style.width = pct + '%';
+    this.applyChunk(this.el('player-hp-chunk'), pct, hp, this.lastPlayerHp, maxHp, () => {
+      this.lastPlayerHp = hp;
+    });
     if (pct < 25) {
       fill.style.background = 'linear-gradient(180deg, #ff2442 0%, #cc1030 100%)';
     } else if (pct < 50) {
@@ -113,7 +206,43 @@ export class UIManager {
     const pct = Math.max(0, (hp / maxHp) * 100);
     const fill = this.el('enemy-hp-fill');
     fill.style.width = pct + '%';
+    this.applyChunk(this.el('enemy-hp-chunk'), pct, hp, this.lastEnemyHp, maxHp, () => {
+      this.lastEnemyHp = hp;
+    });
     this.el('enemy-hp-text').textContent = String(Math.round(hp));
+  }
+
+  private applyChunk(
+    chunk: HTMLElement | null,
+    pct: number,
+    hp: number,
+    lastHp: number,
+    maxHp: number,
+    onDone: () => void
+  ) {
+    if (!chunk) { onDone(); return; }
+    if (lastHp < 0) {
+      chunk.style.transition = 'none';
+      chunk.style.width = pct + '%';
+      onDone();
+      return;
+    }
+    if (hp < lastHp) {
+      const prevPct = Math.max(0, (lastHp / maxHp) * 100);
+      chunk.style.transition = 'none';
+      chunk.style.width = prevPct + '%';
+      chunk.style.opacity = '0.9';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        chunk.style.transition = 'width 0.55s linear, opacity 0.4s ease';
+        chunk.style.width = pct + '%';
+      }));
+      setTimeout(() => { chunk.style.opacity = '0'; onDone(); }, 620);
+    } else {
+      chunk.style.transition = 'none';
+      chunk.style.width = pct + '%';
+      chunk.style.opacity = '0';
+      onDone();
+    }
   }
 
   renderEnemyHp(enemies: readonly EnemyInstance[]) {
@@ -259,6 +388,44 @@ export class UIManager {
     this.el('enemy-name-label').textContent = name;
   }
 
+  setLevelInfo(level: number, name: string) {
+    const levelEl = this.el('level-indicator');
+    if (levelEl) levelEl.textContent = `LVL ${level} - ${name}`;
+  }
+
+  setMuted(muted: boolean) {
+    const btn = this.el('sfx-toggle');
+    if (btn) {
+      btn.textContent = muted ? 'SFX OFF' : 'SFX ON';
+      btn.classList.toggle('muted', muted);
+    }
+  }
+
+  showFightBanner(text: string, sub?: string) {
+    const container = this.el('combo-popups');
+    const el = document.createElement('div');
+    el.className = 'battle-banner';
+    if (sub) {
+      el.innerHTML = `<span class="banner-sub">${sub}</span><span class="banner-main">${text}</span>`;
+    } else {
+      el.innerHTML = `<span class="banner-main">${text}</span>`;
+    }
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+  }
+
+  renderLevelProgress(completed: number, total: number) {
+    const strip = this.el('res-progress');
+    if (!strip) return;
+    strip.innerHTML = '';
+    for (let i = 1; i <= total; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'res-progress-cell' + (i <= completed ? ' cleared' : '');
+      cell.textContent = String(i);
+      strip.appendChild(cell);
+    }
+  }
+
   showDamageNumber(x: number, y: number, amount: number, type: 'normal' | 'critical' | 'special') {
     const container = this.el('damage-numbers');
     const el = document.createElement('div');
@@ -332,6 +499,11 @@ export class UIManager {
       const feverEl = this.el('res-fever');
       if (feverEl) feverEl.textContent = String(feverActivations);
     }
+  }
+
+  setResultLevel(level: number) {
+    const levelEl = this.el('res-level');
+    if (levelEl) levelEl.textContent = String(level);
   }
 
   clearDamageNumbers() {

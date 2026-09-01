@@ -1,18 +1,37 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config';
+import { GAME_WIDTH, GAME_HEIGHT, LEVEL_CONFIGS } from '../config';
 import type { FightStats } from '../types';
 import { UIManager } from '../systems/UIManager';
+import { SoundEngine } from '../systems/SoundEngine';
 
 export class ResultScene extends Phaser.Scene {
   private ui!: UIManager;
+  private stats!: FightStats;
+  private sfx = SoundEngine.instance;
 
   constructor() {
     super('ResultScene');
   }
 
   create(stats: FightStats) {
+    this.stats = stats;
     this.cameras.main.setBackgroundColor('#0a0a12');
     this.ui = new UIManager();
+
+    if (stats.victory) this.sfx.victory();
+    else this.sfx.defeat();
+
+    // Track best level reached
+    const bestKey = 'typefight_max_level';
+    let best = Number(localStorage.getItem(bestKey) ?? '0');
+    if (stats.victory && stats.level > best) {
+      best = stats.level;
+      localStorage.setItem(bestKey, String(best));
+    }
+    const current = stats.victory ? stats.level : stats.level - 1;
+    this.time.delayedCall(250, () => {
+      this.ui.renderLevelProgress(Math.max(current, 0), LEVEL_CONFIGS.length);
+    });
 
     const gfx = this.add.graphics();
     gfx.fillStyle(0x0d0d2b);
@@ -51,16 +70,55 @@ export class ResultScene extends Phaser.Scene {
       stats.mistakes, stats.time,
       stats.movesUsed, stats.feverActivations
     );
+    this.ui.setResultLevel(stats.level);
     this.ui.showResults();
 
+    // Grade reveal
+    const gradeEl = document.getElementById('result-grade');
+    if (gradeEl) {
+      gradeEl.classList.add('reveal-pop');
+      this.time.delayedCall(500, () => gradeEl.classList.remove('reveal-pop'));
+    }
+
     document.getElementById('retry-btn')!.onclick = () => {
+      this.sfx.uiClick();
+      const lvl = LEVEL_CONFIGS[Math.min(stats.level - 1, LEVEL_CONFIGS.length - 1)];
       this.ui.showMenu();
-      this.scene.start('MenuScene');
+      this.scene.start('FightScene', {
+        difficulty: stats.difficulty,
+        enemyType: stats.enemyType,
+        level: stats.level,
+        enemies: lvl.enemyTypes,
+      });
     };
     document.getElementById('menu-btn')!.onclick = () => {
+      this.sfx.uiClick();
       this.ui.showMenu();
       this.scene.start('MenuScene');
     };
+
+    // Next level button (only on victory and if not at max level)
+    const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
+    if (nextBtn) {
+      const canAdvance = stats.victory && stats.level < LEVEL_CONFIGS.length;
+      if (canAdvance) {
+        nextBtn.style.display = '';
+        const nextLevel = LEVEL_CONFIGS[stats.level];
+        nextBtn.innerHTML = `&#9654; NEXT: ${nextLevel.name}`;
+        nextBtn.onclick = () => {
+          this.sfx.uiClick();
+          this.ui.showMenu();
+          this.scene.start('FightScene', {
+            difficulty: nextLevel.difficulty,
+            enemyType: nextLevel.enemyTypes[0],
+            level: stats.level + 1,
+            enemies: nextLevel.enemyTypes,
+          });
+        };
+      } else {
+        nextBtn.style.display = 'none';
+      }
+    }
   }
 
   shutdown() {

@@ -21,7 +21,8 @@ export function getMoveForKey(key: string): CombatMove | null {
 export function getRandomLetter(): { key: string; move: CombatMove } {
   const entries: { key: string; move: CombatMove; weight: number }[] = [];
   const weights: Record<CombatMove, number> = {
-    jab: 30, cross: 25, kick: 20, uppercut: 15, special: 10, haymaker: 12, finisher: 8,
+    jab: 28, cross: 22, kick: 18, uppercut: 12, special: 8, haymaker: 10, finisher: 6,
+    sweep: 20, roundhouse: 10, spinkick: 14,
   };
   for (const move of MOVE_ORDER) {
     const pool = currentPools[move] || [];

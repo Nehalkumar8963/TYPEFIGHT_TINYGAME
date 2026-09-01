@@ -1,10 +1,25 @@
 export type Difficulty = 'easy' | 'normal' | 'hard' | 'insane';
-export type EnemyType = 'rookie' | 'fighter' | 'ninja' | 'boss';
+export type EnemyType = 'rookie' | 'fighter' | 'ninja' | 'boss' | 'samurai' | 'assassin' | 'warlord' | 'demon' | 'shadow' | 'dragon';
 export type EnemyState = 'idle' | 'approaching' | 'attacking' | 'retreating' | 'hurt' | 'dead';
 export type AttackGrade = 'S' | 'A' | 'B' | 'C' | 'D';
-export type CombatMove = 'jab' | 'cross' | 'kick' | 'uppercut' | 'special' | 'haymaker' | 'finisher';
+export type CombatMove = 'jab' | 'cross' | 'kick' | 'uppercut' | 'special' | 'haymaker' | 'finisher' | 'sweep' | 'roundhouse' | 'spinkick';
 export type LetterStatus = 'pending' | 'active' | 'correct' | 'missed' | 'wrong';
 export type CombatMode = 'normal' | 'autofight' | 'fever';
+export type LevelTheme = 'dojo' | 'alley' | 'temple' | 'volcano' | 'space' | 'void' | 'palace' | 'throne' | 'shadow' | 'dragon';
+
+export interface LevelConfig {
+  id: number;
+  name: string;
+  theme: LevelTheme;
+  enemyTypes: EnemyType[];
+  difficulty: Difficulty;
+  bgGradient: [number, number, number];
+  accentColor: number;
+  groundColor: number;
+  starColors: number[];
+  requiredScore: number;
+  description: string;
+}
 
 export interface Pose {
   headX: number; headY: number;
@@ -34,7 +49,13 @@ export interface PixelSpriteDef {
   bodyHeight: number;
   hasHelmet: boolean;
   hasWeapon: boolean;
-  weaponType?: 'sword' | 'staff' | 'claws';
+  weaponType?: 'sword' | 'staff' | 'claws' | 'axe' | 'whip' | 'flame' | 'fist';
+  hasCape?: boolean;
+  capeColor?: number;
+  hasShoulderPads?: boolean;
+  hasEyeGlow?: boolean;
+  eyeGlowColor?: number;
+  bodyStyle?: 'normal' | 'heavy' | 'slim' | 'armored';
 }
 
 export interface CombatMoveConfig {
@@ -105,6 +126,7 @@ export interface FightStats {
   feverActivations: number;
   enemyType: EnemyType;
   difficulty: Difficulty;
+  level: number;
 }
 
 export interface PracticeStats {
