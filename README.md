@@ -1,4 +1,4 @@
-# TYPEFIGHT（タイプファイト）
+# TYPEFIGHT
 
 A browser-based **typing battle game** with a retro Japanese arcade / ukiyo-e aesthetic. Press keys corresponding to combat moves (jab, cross, kick, uppercut, special, haymaker, finisher, sweep, roundhouse, spin kick) to duel pixel-art enemies across themed levels.
 
@@ -27,11 +27,7 @@ A browser-based **typing battle game** with a retro Japanese arcade / ukiyo-e ae
 
 ## Getting Started
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (18+ recommended)
-- npm
-
+###
 ### Install
 
 ```bash
