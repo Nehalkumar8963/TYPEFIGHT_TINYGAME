@@ -105,7 +105,7 @@ Serves the built `dist/` directory locally for preview.
 
 ## Deployment
 
-The project is configured for **Vercel** via `vercel.json`, which sets the build command to `npm run build`, output to `dist/`, and adds SPA rewrites back to `index.html`.
+The project is configured for **Vercel** via `vercel.json`, which sets the build command to `npm run build`, output to `dist/`, and adds SPA rewrites
 
 ## Scripts
 
